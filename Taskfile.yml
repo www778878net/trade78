@@ -1,0 +1,19 @@
+version: '3'
+tasks:
+  shell:
+    desc: 激活 Poetry 虚拟环境    
+    cmds:
+      - poetry shell  
+  dockerall:
+    desc: 构建并推送Docker镜像
+    cmds:
+      - bash ./hooks/dockerall.sh
+
+  docker:
+    desc: 构建并推送Docker镜像
+    cmds:
+      - bash ./hooks/dockercopy.sh
+  default:
+    desc: run 
+    cmds:
+      - poetry run python -m src.main
