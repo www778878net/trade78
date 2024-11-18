@@ -12,11 +12,11 @@ packages = [
 python = ">=3.10,<3.13"
 asyncio = "^3.4.3"
 log78 =  "2.1.2"
-upinfopy = "^0.1.25"
+upinfopy = "^0.1.26"
 pandas = "^2.2.3"
 numpy = "^2.1.2"
 tushare = "^1.4.13"
-yfinance = "^0.2.48"
+
 
 
 
