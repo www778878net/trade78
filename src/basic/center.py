@@ -7,6 +7,7 @@ import queue
 
 from basic.config78 import Config78
 from basic.task_thread_pool import TaskThreadPool
+from center import optimizer
 from center.optimizer import Optimizer
 from trade.grid import StockTradeGrid
 
@@ -25,13 +26,14 @@ class Center():
             'grid': StockTradeGrid
         }
 
-        self.optimizer = Optimizer(self.strategies, self.logger)   
+        self.optimizer = Optimizer(self.strategies, self.logger,self.config)   
         
 
 
     async def run(self):        
         """主循环逻辑"""
         #await self.test()
+        await self.optimizer.run()
         return False
   
     async def test(self):

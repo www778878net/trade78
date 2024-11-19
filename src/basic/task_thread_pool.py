@@ -30,7 +30,7 @@ class TaskThreadPool:
                 return
             time.sleep(10)
             if self.task_queue.empty():
-                for _ in range(6):
+                for _ in range(6):#1分钟还是空就退出
                     time.sleep(10)
                     if not self.task_queue.empty():
                         break

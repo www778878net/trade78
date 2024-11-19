@@ -4,6 +4,7 @@ from log78 import LogEntry,Logger78
 
 class Strategy:
     def __init__(self, logger, debug=True):     
+        self.iswait=False#CPU紧张时设置为TRUE 每次等0.2秒
         self.logger:Logger78 = logger   
         self.debug = debug
         self.uid = None
@@ -46,7 +47,12 @@ class Strategy:
         self.id = ''
 
 
-    def go(self, rv, rt, *args):
+    async def go(self, rv,rt,isclose,issave,isclosewarn=False,dt=None):
+        u"""三次判断"""
+        #rv价格表 rt算法参数表
+        #isclose是否收盘价 有的必须收盘才交易
+        #issave是否保存交易
+        #isclosewarn是否接近报警
         raise NotImplementedError("Strategy.go() must be overridden.")
     
     def getPars(self):
@@ -81,11 +87,26 @@ class Strategy:
                     await self.logger.WARN(log_entry)
                     continue
         return stocks    
-    
+
+class HistoryLogEntry(LogEntry):
+    def __init__(self):
+        super().__init__()     
+        self.cid = None       # 用户 (User ID)
+        self.kind = None      # 算法类型 (Algorithm type)
+        self.line = 'd'       # 日线 (Default to daily line, could be week or hour)
+        self.card = None      # 交易代码 (Stock or asset code)
+        self.dtime = None     # 交易时间 (Trade timestamp)
+        self.price = None     # 交易价格 (Trade price)
+        self.num = None       # 交易数量 (Quantity of the trade)
+        self.reason = None    # 交易原因 (Reason for the trade)
+        self.winval = None    # 赢利 (Profit value)
+        self.remark = None    # 备注 (Remark)
+        self.basic.log_index = "stock_history-main" 
+
 class TradeLogEntry(LogEntry):
     def __init__(self):
         super().__init__()        
-        self.uid = None#用户
+        self.cid = None#用户
         self.kind = None#算法
         self.line = 'd'#日线 （后面可加上周线 或小时线）
         self.card = None
