@@ -1,8 +1,12 @@
+import os
+from log78 import LogEntry,Logger78
+
+
 class Strategy:
-    def __init__(self, s78, debug=True):
-        self.s78 = s78
+    def __init__(self, logger, debug=True):     
+        self.logger:Logger78 = logger   
         self.debug = debug
-        self.cid = None
+        self.uid = None
         self.kind = None
         self.line = None
         self.card = None
@@ -36,12 +40,89 @@ class Strategy:
         self.winnum = 0
         self.allnum = 0
         self.winsum = 0.00
-        self.todayopen = 0
+        self.todayopen = False
         self.douser = ''
-        self.upby = ''
-        self.uptime = None
+        self.upby = ''        
         self.id = ''
 
 
     def go(self, rv, rt, *args):
         raise NotImplementedError("Strategy.go() must be overridden.")
+    
+    def getPars(self):
+        parlist = [1]
+        par2list= [ 1]
+        par3list= [ 1]
+        par4list= [ 1]
+        par5list= [ 1]
+        par6list= [ 1]
+        return parlist, par2list, par3list, par4list, par5list, par6list
+    
+    async def import_stocks(self, filepath):
+        """导入自选股列表并去除前两位字符"""
+        stocks = []
+        print("当前工作目录:", os.getcwd())
+        with open(filepath, 'r', encoding='utf-8') as file:
+            for line in file:
+                stock = line.strip()
+                if stock:
+                    stock=stock[2:]  # 去除前两位字符
+                    log_entry = TradeLogEntry()
+                    log_entry.kind = self.kind
+                    log_entry.card = stock
+                    parlist, par2list, par3list, par4list, par5list, par6list = self.getPars()
+                    log_entry.par = parlist[0]
+                    log_entry.par2 = par2list[0]
+                    log_entry.par3 = par3list[0]
+                    log_entry.par4 = par4list[0]
+                    log_entry.par5 = par5list[0]
+                    log_entry.par6 = par6list[0]
+                    log_entry.event.event_id = log_entry.card+self.kind
+                    await self.logger.WARN(log_entry)
+                    continue
+        return stocks    
+    
+class TradeLogEntry(LogEntry):
+    def __init__(self):
+        super().__init__()        
+        self.uid = None#用户
+        self.kind = None#算法
+        self.line = 'd'#日线 （后面可加上周线 或小时线）
+        self.card = None
+        self.par = 8.00
+        self.par2 = 0.00
+        self.par3 = 0.00
+        self.par4 = 0.00
+        self.par5 = 0.00
+        self.par6 = 0.00#支持6个参数的调整 
+        self.winval = 0.00#算法利润
+        self.dval = '0001-01-01 00:00:00'#跑到哪天了
+        self.val1 = 0.00
+        self.val2 = 0.00
+        self.val3 = 0.00
+        self.val4 = 0.00
+        self.val5 = 0.00
+        self.val6 = 0.00
+        self.val7 = 0.00
+        self.val8 = 0.00
+        self.val9 = 0.00#支持9个策略暂存值
+        self.stoptime = '1900-01-01 00:00:00'#2个多空停止交易时间
+        self.stoptime2 = '1900-01-01 00:00:00'#算法可能在本日或N个周期内不考虑平仓
+        self.upval = 0.00
+        self.upnum = 0
+        self.downnum = 0
+        self.downval = 0.00#持仓多空价格
+        self.status = ''#当前状态好象没用
+        self.douser = ''#分布式用户名 这个是算算法的
+        self.worker = ''#分布式用户名(这个是算优化参数的)  
+        self.optimizetime = '0001-01-01 00:00:00'#优化时间
+        self.iswarnwx = 0#达到算法条件是否微信告警
+        self.winnum = 0
+        self.allnum = 0
+        self.winsum = 0.00#总平仓数 胜平仓数 赢利总和(不计亏损)算凯利公式
+        self.todayopen = False#今天是否有开仓 用于实盘跟踪            
+        self.upby = ''
+    
+
+        #self.event.event_id = self.card+self.kind
+        self.basic.log_index = "stock_trade-main"

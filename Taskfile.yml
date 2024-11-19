@@ -5,15 +5,14 @@ tasks:
     cmds:
       - pip install poetry
       - poetry install
-      - poetry run python -m src.main --use_kafka_log false
   start:
     desc: run 
     cmds:
-      - poetry run python -m src.main --use_kafka_log false
+      - cmd /c "set PYTHONPATH=D:\50.code\35.git78py\trade78\src && poetry run python -m src.main --config config.ini"
   dev:
     desc: run 
     cmds:
-      - poetry run python -m src.main --use_kafka_log true
+      - cmd /c "set PYTHONPATH=D:\50.code\35.git78py\trade78\src && poetry run python -m src.main "
   dockerall:
     desc: 构建并推送Docker镜像
     cmds:
@@ -22,4 +21,3 @@ tasks:
     desc: 构建并推送Docker镜像
     cmds:
       - bash ./hooks/dockercopy.sh
-  

@@ -1,6 +1,12 @@
 # 按D:\50.code\35.git78py\trade78\hooks\model.md 考虑问题 
 # 按D:\50.code\35.git78py\trade78\hooks\doc.md 处理问题
 
+
+#  __optimization(self,rt,parlist,par2list,par3list): 
+- 输入是交易策略和三个参数的可选数组（可选数组可以用类别获取
+- 过程是级联循环三种参数 和日线数据
+- 输出是bestpar,bestpar2,bestpar3,0,0,0 并保存每个参数回测结果
+
 # pooloptimization
 - 每分钟检查一次队列长度 如果低于多少了就添加
 

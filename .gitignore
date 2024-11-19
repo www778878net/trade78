@@ -145,3 +145,6 @@ Thumbs.db
 
 poetry.lock
 logs/
+
+Stock_trade.py
+development.ini

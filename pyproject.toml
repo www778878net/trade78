@@ -4,8 +4,9 @@ version = "0.1.1"
 description = "Simplest and easiest to use quantitative trading automation"
 authors = ["Frieda.Hu <www778878net@189.cn>"]
 packages = [
-   
-
+    { include = "basic", from = "src" },
+ { include = "center", from = "src" },
+  { include = "trade", from = "src" },
 ]
 
 [tool.poetry.dependencies]
@@ -16,6 +17,7 @@ upinfopy = "^0.1.26"
 pandas = "^2.2.3"
 numpy = "^2.1.2"
 tushare = "^1.4.13"
+configobj = "^5.0.9"
 
 
 
