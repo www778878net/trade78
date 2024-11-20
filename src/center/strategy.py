@@ -86,7 +86,27 @@ class Strategy:
                     log_entry.event.event_id = log_entry.card+self.kind
                     await self.logger.WARN(log_entry)
                     continue
-        return stocks    
+        return stocks   
+
+class TradeParLogEntry(LogEntry):
+    def __init__(self):
+        super().__init__() 
+        # 初始化属性
+        self.cid = None        # 用户 (User ID)
+        self.kind = None       # 算法类型 (Algorithm type)
+        self.line = 'd'        # 日线 (默认日线，可能为周线或小时线)
+        self.card = None       # 交易代码 (Stock or asset code)
+        self.par = None        # 参数 1 (Parameter 1)
+        self.par2 = None       # 参数 2 (Parameter 2)
+        self.par3 = None       # 参数 3 (Parameter 3)
+        self.par4 = None       # 参数 4 (Parameter 4)
+        self.par5 = None       # 参数 5 (Parameter 5)
+        self.par6 = None       # 参数 6 (Parameter 6)        
+        self.winval = None     # 备注 (Remark)     
+        self.allnum=0
+        self.winnum =0
+        self.winsum = 0
+        self.basic.log_index = "stock_tradepar-main"  # Elasticsearch索引名称
 
 class HistoryLogEntry(LogEntry):
     def __init__(self):

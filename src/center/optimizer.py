@@ -2,7 +2,7 @@ import queue
 from log78 import Logger78
 from basic.config78 import Config78
 from basic.task_thread_pool import TaskThreadPool
-from center.strategy import Strategy
+from center.strategy import Strategy, TradeLogEntry, TradeParLogEntry
 from trade.grid import StockTradeGrid
 import datetime
 from upinfopy import UpInfo, Api78
@@ -50,11 +50,11 @@ class Optimizer:
         await self.logger.INFO(f"Stock_trade optimization do :{card}")
         dnow=datetime.datetime.now()
         yearstart=str(int(dnow.strftime('%Y'))-4)
-        dstart=yearstart+"-01-01 00:00:00"
+        dstart=yearstart+"-01-01T00:00:00Z"
         #获取日线
         up=UpInfo.getMaster() 
         up.getnumber=9999
-        up.setPars(card,dstart)
+        up.set_par(card,dstart)
         dt=await up.send_back("apistock/stock/stock_data_day/getByCardAll")  
         if(dt==""):    
             return 1,1,1,0,0,0
@@ -68,9 +68,10 @@ class Optimizer:
         tmpcard=self.config.get('DEFAULT', 'optimization', '')
         if(tmpcard==card):
             tmp=self.config.get('DEFAULT', 'optimizationpar', '')     
-        else:
+        else:#清空
             self.config.set('DEFAULT', 'optimization', '')
             self.config.set('DEFAULT', 'optimizationpar', '')  
+            tmp=""
         if(tmp==""):
             parsave=-1
             par2save=-1
@@ -98,31 +99,56 @@ class Optimizer:
                     if(par==parsave and par2==par2save and par3<=par3save):
                         continue
                     #time.sleep(0.1)
-                    rt["winval"]=0
-                    rt["imain"]=0
+                    rt["winval"]=0                    
                     rt["par"]=par
                     rt["par2"]=par2
                     rt["par3"]=par3
                     rt["upnum"]=0
                     rt["downnum"]=0
+                    rt["allnum"]=0
+                    rt["winnum"]=0
+                    rt["winsum"]=0
                     rt["stoptime"]='0001-01-01 00:00:00'
                     rt["stoptime2"]='0001-01-01 00:00:00'
                     rt["dval"]=dstart
                     rt["val1"]=0
                     rt["val2"]=0
+                    rt["val3"] = 0
+                    rt["val4"] = 0
+                    rt["val5"] = 0
+                    rt["val6"] = 0
+                    rt["val7"] = 0
+                    rt["val8"] = 0
+                    rt["val9"] = 0
 
                     for rv in dt:#日线循环             
-                        if(rv["ddate"]<rt["dval"]):
+                        if(rv["tradedate"]<rt["dval"]):
                             continue
-                        rt["dval"] = rv["ddate"]+" 00:00:00" 
+                        rt["dval"] = rv["tradedate"]+" 00:00:00" 
+                        if "lastval" not in rt:    rt["lastval"] = rv["close"] 
                         await strategy_instance.go(rv,rt,True,False,False,dt)
                         continue
                     tmp=rt["winval"]
                     #加上当前的收益
                     tmp+=(rt["lastval"] - rt["upval"]) * rt["upnum"] 
-                    up=UpInfo.getMaster() 
-                    up.setPars(rt["kind"],rt["line"],rt["card"],tmp,rt["par"],rt["par2"],rt["par3"],rt["par4"],rt["par5"],rt["par6"]) 
-                    #mtradepar= self.api.get("apinet/stock/stock2_group_tradepar/mAdd", up) 
+                    log_entry = TradeParLogEntry()
+                    log_entry.kind = rt["kind"]
+                    log_entry.card = rt["card"]
+                    log_entry.par = rt["par"]
+                    log_entry.par2 =  rt["par2"]
+                    log_entry.par3 =  rt["par3"]
+                    log_entry.par4 =  rt["par4"]
+                    log_entry.par5 =  rt["par5"]
+                    log_entry.par6 =  rt["par6"]
+                    log_entry.winval =  tmp
+                    log_entry.allnum = rt["allnum"]
+                    log_entry.winnum = rt["winnum"]
+                    log_entry.winsum = rt["winsum"]
+                    log_entry.event.event_id = log_entry.card+str(log_entry.par) +str(log_entry.par2) +str(log_entry.par3) +str(log_entry.par4) +str(log_entry.par5)
+                    await self.logger.WARN(log_entry)
+                    # up=UpInfo.getMaster() 
+                    # up.set_par(rt["kind"],rt["line"],rt["card"],tmp,rt["par"],rt["par2"],rt["par3"],rt["par4"],rt["par5"],rt["par6"]) 
+                    #mtradepar= self.api.get("apinet/stock/stock_tradepar/mAdd", up) 
                     if(tmp>bestwinval or bestwinval==-99999999 ):
                         bestwinval=tmp
                         bestpar=par
@@ -131,9 +157,10 @@ class Optimizer:
                         #if(tmp>nowwinval):
                             #up=UpInfo.getMaster() 
                             #up.mid=rt["id"]
-                            #up.setPars(bestpar,bestpar2,bestpar3,0,0,0,rt["card"],rt["kind"],rt["line"])
+                            #up.set_par(bestpar,bestpar2,bestpar3,0,0,0,rt["card"],rt["kind"],rt["line"])
                             #这里可能造成计算中途被删除了 就没有历史记录了
                             #tmp= self.api.get("apinet/stock/stock2_trade/mInit", up)
+                    self.config.set('DEFAULT', 'optimization', card)
                     self.config.set('DEFAULT', 'optimizationpar',str(par)+","+str(par2)+","+str(par3)+","+str(bestwinval)+","+str(bestpar)+","+str(bestpar2)+","+str(bestpar3))
                     # self._log.add("stocktrade__optimization once:"+rt["kind"]+card+" "+str(par)+" "+str(par2)+" "+str(par3)+","+str(bestwinval))
                         #return bestpar,bestpar2,bestpar3
@@ -146,16 +173,54 @@ class Optimizer:
 
 
     async def _run_task(self, task):
+        kind = task["kind"]
+        strategy:Strategy = self.strategies[kind]
+        strategy_instance = strategy(self.logger,debug=True)            
+        bestpar,bestpar2,bestpar3,bestpar4,bestpar5,bestpar6 =await self.__optimization(task,strategy_instance)
+        #保存算法当前最优状态
+        log_entry = TradeLogEntry()
+        log_entry.kind = kind
+        log_entry.card = task["card"]      
+        log_entry.par = bestpar
+        log_entry.par2 = bestpar2
+        log_entry.par3 = bestpar3
+        log_entry.par4 = bestpar4
+        log_entry.par5 = bestpar5
+        log_entry.par6 = bestpar6
+        # 修改字段值
+        log_entry.optimizetime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')   # 优化时间
+        log_entry.winval = 0                            # 算法利润
+        log_entry.upnum = 0                             # 上升数量
+        log_entry.downnum = 0                           # 下降数量
+        log_entry.stoptime = '1911-01-01 00:00:00'               # 停止时间1
+        log_entry.stoptime2 = '0001-01-01 00:00:00'              # 停止时间2
+        log_entry.dval = '1910-01-01 00:00:00'                   # 日期值
+        log_entry.val7 = 0                              # 策略值7
+        log_entry.val8 = 0                              # 策略值8
+        log_entry.val9 = 0                              # 策略值9
+        log_entry.val1 = 0                              # 策略值1
+        log_entry.val2 = 0                              # 策略值2
+        log_entry.val3 = 0                              # 策略值3
+        log_entry.val4 = 0                              # 策略值4
+        log_entry.val5 = 0                              # 策略值5
+        log_entry.val6 = 0                              # 策略值6
+        log_entry.worker = ''                           # 分布式用户名（优化参数的）
+        log_entry.allnum = 0                            # 总数
+        log_entry.winnum = 0                            # 胜利次数
+        log_entry.winsum = 0                            # 赢利总和
+        log_entry.event.event_id = log_entry.card+kind
+        tmp=await self.logger.WARN(log_entry)
+        return
         try:
              
             kind = task["kind"]
             strategy:Strategy = self.strategies[kind]
-            strategy_instance = strategy(self.logger,Debug=True)            
+            strategy_instance = strategy(self.logger,debug=True)            
             bestpar,bestpar2,bestpar3,bestpar4,bestpar5,bestpar6 =await self.__optimization(task,strategy_instance)
             #保存算法当前状态  
            
         except Exception as e:
-            self.logger.ERROR(f"Error running task: {e}")
+            await self.logger.ERROR(f"Error stock _run_task : {e}")
         return
     
 

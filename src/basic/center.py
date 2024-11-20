@@ -33,7 +33,8 @@ class Center():
     async def run(self):        
         """主循环逻辑"""
         #await self.test()
-        await self.optimizer.run()
+        #await self.optimizer.run()
+        await self.optimizer.test()
         return False
   
     async def test(self):

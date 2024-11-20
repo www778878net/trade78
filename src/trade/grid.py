@@ -8,8 +8,8 @@ class StockTradeGrid(Strategy):
     u""""N日最高最低区间分为10格 每格交易10万
     val1 val2区间高低点 val3当前持仓区间
     """
-    def __init__(self, debug=True):
-        super().__init__(debug)
+    def __init__(self, logger, debug=True):   
+        super().__init__(logger,debug)
         self.kind = "grid"
 
     async def go(self, rv,rt,isclose,issave,isclosewarn=False,dt=None):
@@ -30,26 +30,31 @@ class StockTradeGrid(Strategy):
         tmp=self.refgrid(rt,dt)   
         if(tmp["val1"]==None):return   
 
-        val1 = tmp["val1"]  # 高点
-        val2 = tmp["val2"]  # 低点
+        val1 = rt["val1"]  # 高点
+        val2 = rt["val2"]  # 低点
         grid_size = (val1 - val2) / 10  # 每格的价格区间
         # 计算当前价格所在的网格
         grid_index = int((vclose - val2) / grid_size)
+          # 定义增仓和减仓的区间
+        buy_index = 10 - grid_index-1  # 增仓区间
+       
         # 当前持仓量 1~10
-        areadef=10-grid_index
-        areagrid=tmp["val3"]        
+        sell_index=10-grid_index  # 减仓区间
+        areagrid=rt["val3"]        
         
-        if(areagrid==areadef):return
+        if(areagrid==sell_index):return
 
         opennum=int(100000/vclose)  # 向下取整
         openval=vclose
-        rt["todayclose"]=openval
-        if(areagrid<areadef):            
-            doubel=areadef-areagrid
-            reason='开仓'+str(doubel)+'份'
+        
+        if(areagrid<buy_index ):            
+            multiple=buy_index-areagrid
+            reason='开仓'+str(multiple)+'份'
+            opennum=opennum*multiple
             rt["upval"]=(upval*upnum+opennum*openval)/(upnum+opennum)
             rt["upnum"]=upnum+opennum
-            remark=str(vclose)+"达到条件开仓数" +str(upnum)   
+            rt["val3"]=buy_index
+            remark=str(vclose)+"达到条件开仓数" +str(opennum)   
             if( isclosewarn  ):    
                 rt["todayopen"]=True#今天开仓
             if(issave):
@@ -65,17 +70,24 @@ class StockTradeGrid(Strategy):
                 await self.logger.WARN(log_entry)
             return
         
+        if(areagrid<=sell_index):return
         #平仓
-        doubel=areagrid-areadef
-        reason='平仓'+str(doubel)+'份'
-        if(areadef==0):#全平
+        multiple=areagrid-sell_index
+        reason='平仓'+str(multiple)+'份'
+        if(sell_index==0):#全平
             opennum=upnum
-        winval=(openval - upval)*opennum-openval*opennum *0.002 ;   
+        else:
+            opennum=opennum*multiple
+        winval=(openval - upval)*opennum-openval*opennum *0.002 
+        rt["allnum"]+=1 
         if(openval>=upval):
             rt["winsum"]+=winval#赢利总和(不计亏损)算凯利公式
             rt["winnum"]+=1
         rt["upnum"]=rt["upnum"]-opennum
         rt["winval"]+=winval
+        rt["val3"]=sell_index
+        if( isclosewarn  ): 
+            rt["todayclose"]=True
         if(issave):
             log_entry = HistoryLogEntry()
             log_entry.card = card
@@ -102,13 +114,15 @@ class StockTradeGrid(Strategy):
         highest_price = float('-inf')
         lowest_price = float('inf')
         for day_data in dt:
-            date = datetime.datetime.strptime(day_data['date'], '%Y-%m-%d')
+            date = datetime.datetime.strptime(day_data['tradedate'], '%Y-%m-%d')
             if date > dend:
                 break
             if date >= dstart:
                 highest_price = max(highest_price, day_data['high'])
                 lowest_price = min(lowest_price, day_data['low'])
 
+        rt["val1"] = highest_price
+        rt["val2"] = lowest_price
         return {
             "val1": highest_price if highest_price != float('-inf') else None,
             "val2": lowest_price if lowest_price != float('inf') else None,
