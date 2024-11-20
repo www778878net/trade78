@@ -67,9 +67,9 @@ async def main():
 
 def init():  
     up = UpInfo()
-    up.sid = os.getenv('APP_ENV', config.get('DEFAULT', 'sid', '')).lower()
-    up.uname =  os.getenv('APP_ENV', config.get('DEFAULT', 'uname', 'guest')).lower() 
-    up.api =  os.getenv('APP_ENV', config.get('DEFAULT', 'api', '')).lower() 
+    up.sid = os.getenv('sid', config.get('DEFAULT', 'sid', '')).lower()
+    up.uname =  os.getenv('uname', config.get('DEFAULT', 'uname', 'guest')).lower() 
+    up.api =  os.getenv('api', config.get('DEFAULT', 'api', '')).lower()     
     UpInfo.setMaster(up)
     return 
 
