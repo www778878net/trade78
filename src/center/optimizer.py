@@ -98,6 +98,8 @@ class Optimizer:
                         continue
                     if(par==parsave and par2==par2save and par3<=par3save):
                         continue
+                    with open('/tmp/healthy', 'w') as f:
+                        f.write('healthy')
                     #time.sleep(0.1)
                     rt["winval"]=0                    
                     rt["par"]=par
