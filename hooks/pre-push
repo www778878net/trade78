@@ -1,0 +1,111 @@
+#!/bin/sh
+
+# 获取操作人和工作目录
+operator=$(git config user.name)
+work_dir=$(pwd)
+current_branch=$(git rev-parse --abbrev-ref HEAD)
+
+
+echo "操作人: $operator"
+echo "当前分支: $current_branch"
+
+
+cd "$work_dir"
+
+# 激活指定的 Poetry 虚拟环境
+VENV_PATH="C:/Users/Administrator/AppData/Local/pypoetry/Cache/virtualenvs/trade78-ukzetdtT-py3.12"
+source "$VENV_PATH/Scripts/activate"
+
+if [ "$current_branch" = "develop" ]; then
+    echo "当前分支是 develop。运行 pre-push 检查... " 
+
+    echo "切换到 main 分支并更新... "
+    git checkout main
+    git pull origin main
+
+    echo "获取 develop 分支最后一次提交信息... "
+    last_commit_msg=$(git log develop -1 --pretty=%B)
+
+    echo "合并 develop 分支，使用 --squash 选项... "
+    git merge --squash develop
+
+    echo "提交更改... "
+    git commit -m "$last_commit_msg"
+
+    echo "合并到 main 成功完成 "
+
+elif [ "$current_branch" = "main" ]; then
+    echo "当前分支是 main。运行... "
+    echo "运行测试... "
+    # poetry run pytest
+
+    # if [ $? -ne 0 ]; then
+    #     echo "测试失败，请修复上述问题后再推送。"
+    #     exit 1
+    # fi
+
+    echo "测试通过  开始构建Docker镜像... "
+
+    # 递增版本号
+    poetry run poetry version patch
+
+    # 获取新版本号
+    new_version=$(poetry run poetry version -s)
+
+    # 检查版本号是否为空
+    if [ -z "$new_version" ]; then
+        echo "Failed to get new version number."
+        exit 1
+    fi
+
+    # # 私有镜像仓库地址
+   REPO_URL="crpi-3zr415nakxg4qr8l.cn-hangzhou.personal.cr.aliyuncs.com/7788soft"
+
+    # # 镜像名称
+    IMAGE_NAME="trade78"
+
+    # # 构建Docker镜像
+    docker build -f Dockerfile -t $REPO_URL/$IMAGE_NAME:$new_version .
+
+    # # 推送Docker镜像到指定的镜像仓库
+    docker push $REPO_URL/$IMAGE_NAME:$new_version
+
+    # # 更新latest标签
+    docker tag $REPO_URL/$IMAGE_NAME:$new_version $REPO_URL/$IMAGE_NAME:latest
+    docker push $REPO_URL/$IMAGE_NAME:latest
+
+    echo "Docker镜像已推送到仓库，版本号: $new_version"
+
+       # 将修改过的文件添加到Git
+    git add pyproject.toml
+    git commit -m "Bump version to $new_version"
+
+    # 更新Kubernetes中的Job镜像
+    echo "通过 SSH 连接到远程 Kubernetes 管理机并更新应用..."
+    ssh -i D:/tmp7788doc/BaiduSyncdisk/1.imp/keys/7788/202410 -p 2213 root@192.168.31.181 << EOF
+kubectl set image deployment/trade78-app trade78=$REPO_URL/$IMAGE_NAME:$new_version
+if [ \$? -ne 0 ]; then
+  echo "更新 Kubernetes 应用失败"
+  exit 1
+fi
+echo "Kubernetes 应用更新成功"
+EOF
+    if [ $? -ne 0 ]; then
+        echo "SSH 连接或命令执行失败，推送已中止"
+        exit 1
+    fi
+    echo "Kubernetes 应用更新成功"
+
+    echo "切换到 develop 分支并合并 main... (执行 ID: $EXECUTION_ID)"
+    git checkout develop 
+    git merge -X theirs main
+    if [ $? -ne 0 ]; then
+        echo "切换到 develop 分支并合并 main 失败，推送已中止 (执行 ID: $EXECUTION_ID)"
+        exit 1
+    fi
+    echo "切换到 develop 分支并合并 main 成功完成 (执行 ID: $EXECUTION_ID)"
+
+fi
+
+# 退出Poetry虚拟环境
+exit 0

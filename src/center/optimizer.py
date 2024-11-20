@@ -33,6 +33,7 @@ class Optimizer:
         up=UpInfo.getMaster() 
         up.getnumber=10
         dt=await up.send_back("apistock/stock/stock_trade/mForOptimizetimeAll")  
+        print (dt)
         for row in dt:
             await self._run_task(row)
             continue
@@ -175,6 +176,7 @@ class Optimizer:
 
 
     async def _run_task(self, task):
+        print (task)
         kind = task["kind"]
         strategy:Strategy = self.strategies[kind]
         strategy_instance = strategy(self.logger,debug=True)            
