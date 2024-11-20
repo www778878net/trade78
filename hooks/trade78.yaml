@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: trade78-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: trade78
+  template:
+    metadata:
+      labels:
+        app: trade78
+    spec:
+      imagePullSecrets:
+        - name: my-registry-secret
+      containers:
+      - name: trade78
+        image: crpi-3zr415nakxg4qr8l.cn-hangzhou.personal.cr.aliyuncs.com/7788soft/trade78:latest
+        imagePullPolicy: Always  # 强制拉取最新镜像
+        ports:
+        - containerPort: 80
+        env:
+        - name: APP_ENV
+          value: "development"
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        livenessProbe:
+          exec:
+            command:
+            - python
+            - -c
+            - "import os; import time; last_modified = os.path.getmtime('/tmp/healthy'); os._exit(0) if time.time() - last_modified < 60 else os._exit(1)"
+          initialDelaySeconds: 30
+          periodSeconds: 30  # 检测间隔时间改为30秒
+          failureThreshold: 6  # 3次失败才算失败
+   
