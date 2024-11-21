@@ -180,7 +180,7 @@ class Optimizer:
 
 
     async def _run_task(self, task):
-        print (task)
+        #print (task)
         kind = task["kind"]
         strategy:Strategy = self.strategies[kind]
         strategy_instance = strategy(self.logger,debug=True)            
