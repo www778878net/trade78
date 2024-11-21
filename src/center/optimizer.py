@@ -76,7 +76,7 @@ class Optimizer:
             #清空elk原来的这个card的记录
             up=UpInfo.getMaster() 
             up.set_par(card)
-            dt=await up.send_back("apistock/stock/stock_trade/mClearTradepar")  
+            await up.send_back("apistock/stock/stock_trade/mClearTradepar")  
         if(tmp==""):
             parsave=-1
             par2save=-1
