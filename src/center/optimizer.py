@@ -66,6 +66,7 @@ class Optimizer:
     async def __optimization(self,rt,strategy_instance:Strategy):
         parlist, par2list, par3list, par4list, par5list, par6list = strategy_instance.getPars()
         card = rt["card"] 
+        kind= rt["kind"]
         mid=rt["id"]
         await self.logger.INFO(f"Stock_trade optimization do :{card}")
         dnow=datetime.datetime.now()
@@ -94,7 +95,7 @@ class Optimizer:
             tmp=""
             #清空elk原来的这个card的记录
             up=UpInfo.getMaster() 
-            up.set_par(card)
+            up.set_par(card,kind)
             await up.send_back("apistock/stock/stock_trade/mClearTradepar")  
         if(tmp==""):
             parsave=-1
