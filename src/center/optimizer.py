@@ -134,7 +134,7 @@ class Optimizer:
                             dval = datetime.datetime.strptime(rt["dval"], "%Y-%m-%d %H:%M:%S")  # 转为 datetime 对象
                         except Exception as e:
                             # 打印异常信息和 rv, rt 的值（所有内容在一行）
-                            print(f"Exception occurred: {e}, rv['tradedate']: {rv['tradedate']}, rt['dval']: {rt['dval']}")
+                            print(f"Exception occurred: {e}, rv['tradedate']: {repr(rv)}, dt: {repr(dt)}")
                             continue
                         
                              
