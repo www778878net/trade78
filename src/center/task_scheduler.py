@@ -125,13 +125,14 @@ class TaskScheduler:
         # 修改字段值      
         log_entry.lastval =  rt.get("lastval", 0)
         log_entry.winval = rt["winval"]  # 算法利润
+        log_entry.dval = rt["dval"]  # 日期值
         log_entry.upnum = rt["upnum"]   # 上升数量
         log_entry.upval = rt["upval"] 
         log_entry.downnum = rt["downnum"]  # 下降数量
         log_entry.downval = rt["downval"] 
         log_entry.stoptime = rt["stoptime"]  # 停止时间1
         log_entry.stoptime2 = rt["stoptime2"]  # 停止时间2
-        log_entry.dval = rt["dval"]  # 日期值
+        log_entry.optimizetime = rt["optimizetime"]
         log_entry.val7 = rt["val7"]  # 策略值7
         log_entry.val8 = rt["val8"]  # 策略值8
         log_entry.val9 = rt["val9"]  # 策略值9
