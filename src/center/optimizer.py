@@ -57,7 +57,7 @@ class Optimizer:
         up.getnumber=9999
         up.set_par(card,dstart)
         dt=await up.send_back("apistock/stock/stock_data_day/getByCardAll")  
-        if(dt==""):    
+        if(len(dt)==0):    
             return 1,1,1,0,0,0
         bestwinval=-99999999#最好战绩
         bestpar=0#最好参数
@@ -141,7 +141,7 @@ class Optimizer:
                         if(tradedate<dval ):
                             continue
                         rt["dval"] = rv["tradedate"]+" 00:00:00" 
-                        if "lastval" not in rt:    rt["lastval"] = rv["close"] 
+                        rt["lastval"] = rv["close"] 
                         await strategy_instance.go(rv,rt,True,False,False,dt)
                         continue
                     tmp=rt["winval"]
