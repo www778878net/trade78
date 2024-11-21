@@ -45,7 +45,7 @@ steam_user = default_user
 # api_url = config.get('DEFAULT', 'api_url')
 # steam_user = config.get('DEFAULT', 'steam_user')
 
-# print(api_url, steam_user)
+
 
 # # 写入配置
 # config.set('DEFAULT', 'new_key', 'new_value')
