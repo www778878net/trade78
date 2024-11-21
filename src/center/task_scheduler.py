@@ -52,6 +52,7 @@ class TaskScheduler:
         dtTrade =await up.send_back("apistock/stock/stock_trade/getByTrade", up) 
         dtTrade= json.loads(dtTrade)  # 返回JSON格式的数据
         for rt in dtTrade:#算法循环 
+            self.dnext = datetime.datetime.now()
             with open('/tmp/healthy', 'w') as f:
                 f.write('healthy')
             self.dnext=datetime.datetime.now() + datetime.timedelta(minutes=10)

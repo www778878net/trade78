@@ -1,3 +1,4 @@
+import asyncio
 import queue
 from log78 import Logger78
 from basic.config78 import Config78
@@ -14,13 +15,13 @@ class Optimizer:
         self.config:Config78 = config
         self.task_queue = queue.Queue()
         self.thread_pool = TaskThreadPool(self._run_task, self.task_queue, max_workers=2, logger=self.logger)
-        self.dmin =   datetime.datetime.now()- datetime.timedelta(days=1)  # 默认设置启动时运行一次
+        self.dnext =   datetime.datetime.now()- datetime.timedelta(days=1)  # 默认设置启动时运行一次
         
-    async def run(self):
+    async def Taskrun(self):
         """检查任务队列是否完成 并添加队列"""
-        if (datetime.datetime.now() - self.dmin).total_seconds() < 60:  # 每2分钟运行一次
+        if (datetime.datetime.now() - self.dnext).total_seconds() < 60:  # 每2分钟运行一次
             return
-        self.dmin=datetime.datetime.now()  
+        self.dnext=datetime.datetime.now()  
         if(self.thread_pool.get_queue_size()>=10):return 
         up=UpInfo.getMaster() 
         up.getnumber=10
@@ -29,14 +30,32 @@ class Optimizer:
 
         return
     
-    async def test(self):
+    async def run(self):
+        """检查任务队列是否完成，并添加任务队列"""
+        current_time = datetime.datetime.now()
+        
+        # 每分钟运行一次优化任务
+        if (current_time - self.dnext).total_seconds() < 600:
+            return
+        
+        self.dnext = current_time  # 更新时间标记
+        asyncio.create_task(self.__run())  # 通过 asyncio 调度 __run
+    
+    async def __run(self):
         up=UpInfo.getMaster() 
         up.getnumber=10
         dt=await up.send_back("apistock/stock/stock_trade/mForOptimizetimeAll")  
         #print (dt)
+        isAllok=True  
         for row in dt:
             await self._run_task(row)
+            isAllok=False
             continue
+        if(isAllok):
+            await self.logger.INFO("Stock_Trade Optimizer allok")
+            self.dnext=datetime.datetime.now() + datetime.timedelta(minutes=10)
+        else:
+            self.dnext=datetime.datetime.now() + datetime.timedelta(minutes=1)
         return
 
     def _add_tasks(self, tasks):
