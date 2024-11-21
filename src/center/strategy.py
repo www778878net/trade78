@@ -130,6 +130,7 @@ class TradeLogEntry(LogEntry):
         self.kind = None#算法
         self.line = 'd'#日线 （后面可加上周线 或小时线）
         self.card = None
+        self.lastval=0.00
         self.par = 8.00
         self.par2 = 0.00
         self.par3 = 0.00
