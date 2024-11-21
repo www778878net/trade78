@@ -130,7 +130,7 @@ class Optimizer:
 
                     for rv in dt:#日线循环 
                         try:
-                            tradedate = datetime.datetime.strptime(rv["tradedate"], "%Y-%m-%d").date()  # 转为 date 对象
+                            tradedate = datetime.datetime.strptime(rv["tradedate"], "%Y-%m-%d")  # 转为 date 对象
                             dval = datetime.datetime.strptime(rt["dval"], "%Y-%m-%d %H:%M:%S")  # 转为 datetime 对象
                         except Exception as e:
                             # 打印异常信息和 rv, rt 的值（所有内容在一行）
