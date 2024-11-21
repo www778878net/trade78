@@ -123,7 +123,7 @@ class TaskScheduler:
         log_entry.par6 = rt["par6"]
         
         # 修改字段值      
-        log_entry.lastval = rt["lastval"]
+        log_entry.lastval =  rt.get("lastval", 0)
         log_entry.winval = rt["winval"]  # 算法利润
         log_entry.upnum = rt["upnum"]   # 上升数量
         log_entry.upval = rt["upval"] 
