@@ -1,10 +1,12 @@
+import asyncio
 import datetime
 import queue
+import threading
 from log78 import Logger78
 from basic.config78 import Config78
-from basic.task_thread_pool import TaskThreadPool
-from center.strategy import Strategy
+from center.strategy import Strategy, TradeLogEntry
 from upinfopy import UpInfo
+import json
 
 
 class TaskScheduler:
@@ -12,9 +14,9 @@ class TaskScheduler:
         self.strategies = strategies      
         self.logger = logger
         self.config: Config78 = config
-        self.task_queue = queue.Queue()
-        self.thread_pool = TaskThreadPool(self._run_task, self.task_queue, max_workers=max_workers, logger=self.logger)
-        self.dmin = datetime.datetime.now() - datetime.timedelta(days=1)  # 默认设置启动时运行一次
+        #self.task_queue = queue.Queue()
+        #self.thread_pool = TaskThreadPool(self._run_task, self.task_queue, max_workers=max_workers, logger=self.logger)
+        self.dnext = datetime.datetime.now() - datetime.timedelta(days=1)  # 默认设置启动时运行一次
         
 
     async def run(self):
@@ -22,35 +24,51 @@ class TaskScheduler:
         current_time = datetime.datetime.now()
         
         # 每分钟运行一次优化任务
-        if (current_time - self.dmin).total_seconds() < 60:
+        if (current_time - self.dnext).total_seconds() < 600:
             return
         
-        self.dmin = current_time  # 更新时间标记
+        self.dnext = current_time  # 更新时间标记
+        asyncio.create_task(self.__run())  # 通过 asyncio 调度 __run
+  
         
-        if self.thread_pool.get_queue_size() >= 10:
-            return  # 如果任务队列已满，不再添加任务
-        
-        up = UpInfo.getMaster() 
-        up.getnumber = 9999
+        # up = UpInfo.getMaster() 
+        # up.getnumber = 9999
         # dt = await up.send_back("apistock/stock/stock_trade/getByTrade")  
         # self._add_tasks(dt)
+        return
+    
+    async def __run(self):
+        u"""5分钟一次实时交易""" 
+        dover=datetime.datetime.now() 
+        hour=int(dover.strftime('%H')  )
+        if(hour<15):dover-= datetime.timedelta(days=1)
+        dover=dover.strftime('%Y-%m-%d 00:00:00')
 
-    async def test(self):
-        """用于测试任务调度和参数优化"""
-        up = UpInfo.getMaster() 
-        up.getnumber = 10
-        dt = await up.send_back("apistock/stock/stock_trade/getByTrade")  
-        print(dt)
-        for row in dt:
-            await self._run_task(row)
+        isAllok=True        
+        up = UpInfo.getMaster()           
+        up.order="dval"
+        up.set_par(dover)
+        up.getnumber = 100
+        dtTrade =await up.send_back("apistock/stock/stock_trade/getByTrade", up) 
+        dtTrade= json.loads(dtTrade)  # 返回JSON格式的数据
+        for rt in dtTrade:#算法循环 
+            with open('/tmp/healthy', 'w') as f:
+                f.write('healthy')
+            self.dnext=datetime.datetime.now() + datetime.timedelta(minutes=10)
+            await self.__run_do(rt)
+            #self._log.add("Stock_Trade __run go over"+rt["card"]+rt["dval"]) 
+            isAllok=False
+            continue
+        if(isAllok):
+            await self.logger.INFO("Stock_Trade __run allok")
+            self.dnext=datetime.datetime.now() + datetime.timedelta(minutes=10)
+        else:
+            self.dnext=datetime.datetime.now() + datetime.timedelta(minutes=1)
+        return
 
-    def _add_tasks(self, tasks):
-        """动态添加多个任务到队列中"""
-        self.thread_pool.add_tasks(tasks)
-
-    async def _run_task(self, rt):
+    async def __run_do(self, rt):
         """执行每个优化任务"""
-        print(f"Processing task: {rt}")
+        #print(f"Processing task: {rt}")
         #获取每个代码算法最小日期D
         dnow=datetime.datetime.now()
         dstart=rt["dval"]
@@ -60,17 +78,22 @@ class TaskScheduler:
         strategy_instance = strategy(self.logger,debug=True)
         line=rt["line"]      
         #if rt["kind"]!="grid":                continue
-        if(dstart=="0001-01-01 00:00:00"):
+        if(dstart=="0001-01-01 00:00:00"  ):
             yearstart=str(int(dnow.strftime('%Y'))-4)
             dstart=yearstart+"-01-01 00:00:00"
             rt["dval"]=dstart
-                #获取日线
+
+        # 将字符串解析为 datetime 对象        
+        dt_object = datetime.datetime.strptime(dstart, "%Y-%m-%d %H:%M:%S")        
+        dstartUTC = dt_object.strftime("%Y-%m-%dT%H:%M:%SZ")
+        #获取日线
         up=UpInfo.getMaster() 
         up.getnumber=9999
-        up.set_par(card,dstart)
+        up.set_par(card,dstartUTC)
         dt=await up.send_back("apistock/stock/stock_data_day/getByCardAll") 
-        if(dt==''):   
+        if(dt==None or dt==''):   
             return
+        needsave=True
         await self.logger.INFO(f"Stock_trade _run_task do :{card}")
         for rv in dt:#日线循环
             dmin5=datetime.datetime.strptime(rv["tradedate"],'%Y-%m-%d')
@@ -78,4 +101,48 @@ class TaskScheduler:
             if(dval>=dmin5):continue
 
             rt["dval"] = rv["tradedate"]+" 00:00:00"
-            await strategy_instance.go(rv,rt,True,True,False)
+            rt["lastval"]=rv["close"] 
+            await strategy_instance.go(rv,rt,True,True,False,dt)
+            continue
+        ##保存算法当前状态   
+        if(needsave):    
+            await self.__save(rt)
+    
+    async def __save(self,rt):
+        """保存当前算法"""
+        log_entry = TradeLogEntry()
+        # 使用 rt 字典来访问字段值
+        log_entry.kind = rt["kind"]
+        log_entry.card = rt["card"]      
+        log_entry.par = rt["par"]
+        log_entry.par2 = rt["par2"]
+        log_entry.par3 = rt["par3"]
+        log_entry.par4 = rt["par4"]
+        log_entry.par5 = rt["par5"]
+        log_entry.par6 = rt["par6"]
+        
+        # 修改字段值      
+        log_entry.lastval = rt["lastval"]
+        log_entry.winval = rt["winval"]  # 算法利润
+        log_entry.upnum = rt["upnum"]   # 上升数量
+        log_entry.upval = rt["upval"] 
+        log_entry.downnum = rt["downnum"]  # 下降数量
+        log_entry.downval = rt["downval"] 
+        log_entry.stoptime = rt["stoptime"]  # 停止时间1
+        log_entry.stoptime2 = rt["stoptime2"]  # 停止时间2
+        log_entry.dval = rt["dval"]  # 日期值
+        log_entry.val7 = rt["val7"]  # 策略值7
+        log_entry.val8 = rt["val8"]  # 策略值8
+        log_entry.val9 = rt["val9"]  # 策略值9
+        log_entry.val1 = rt["val1"]  # 策略值1
+        log_entry.val2 = rt["val2"]  # 策略值2
+        log_entry.val3 = rt["val3"]  # 策略值3
+        log_entry.val4 = rt["val4"]  # 策略值4
+        log_entry.val5 = rt["val5"]  # 策略值5
+        log_entry.val6 = rt["val6"]  # 策略值6        
+        log_entry.allnum = rt["allnum"]  # 总数
+        log_entry.winnum = rt["winnum"]  # 胜利次数
+        log_entry.winsum = rt["winsum"]  # 赢利总和
+        log_entry.event.event_id = log_entry.card+log_entry.kind
+        tmp=await self.logger.WARN(log_entry)
+        return

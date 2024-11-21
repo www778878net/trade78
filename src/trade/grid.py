@@ -35,11 +35,11 @@ class StockTradeGrid(Strategy):
         grid_size = (val1 - val2) / 10  # 每格的价格区间
         if(grid_size==0):return
         # 如果格子小于val1的10%，调整格子大小为原来的1/5
-        if grid_size < val1 * 0.1:
+        if grid_size < val1 * 0.01:
             grid_size /= 5
 
             # 如果格子仍然小于10%且调整后的格子大小依然很小，则退出
-            if grid_size < val1 * 0.1:
+            if grid_size < val1 * 0.01:
                 return  # 格子过小，退出
         
         # 计算当前价格所在的网格
