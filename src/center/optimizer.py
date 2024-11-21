@@ -73,6 +73,10 @@ class Optimizer:
             self.config.set('DEFAULT', 'optimization', '')
             self.config.set('DEFAULT', 'optimizationpar', '')  
             tmp=""
+            #清空elk原来的这个card的记录
+            up=UpInfo.getMaster() 
+            up.set_par(card)
+            dt=await up.send_back("apistock/stock/stock_trade/mClearTradepar")  
         if(tmp==""):
             parsave=-1
             par2save=-1
@@ -147,7 +151,7 @@ class Optimizer:
                     log_entry.allnum = rt["allnum"]
                     log_entry.winnum = rt["winnum"]
                     log_entry.winsum = rt["winsum"]
-                    log_entry.event.event_id = log_entry.card+str(log_entry.par) +str(log_entry.par2) +str(log_entry.par3) +str(log_entry.par4) +str(log_entry.par5)
+                    log_entry.event.event_id = log_entry.card + "_" + str(log_entry.par) + "_" + str(log_entry.par2) + "_" + str(log_entry.par3) + "_" + str(log_entry.par4) + "_" + str(log_entry.par5)
                     await self.logger.WARN(log_entry)
                     # up=UpInfo.getMaster() 
                     # up.set_par(rt["kind"],rt["line"],rt["card"],tmp,rt["par"],rt["par2"],rt["par3"],rt["par4"],rt["par5"],rt["par6"]) 
@@ -176,7 +180,7 @@ class Optimizer:
 
 
     async def _run_task(self, task):
-        print (task)
+        #print (task)
         kind = task["kind"]
         strategy:Strategy = self.strategies[kind]
         strategy_instance = strategy(self.logger,debug=True)            

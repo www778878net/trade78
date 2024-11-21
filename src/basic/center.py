@@ -9,6 +9,7 @@ from basic.config78 import Config78
 from basic.task_thread_pool import TaskThreadPool
 from center import optimizer
 from center.optimizer import Optimizer
+from center.task_scheduler import TaskScheduler
 from trade.grid import StockTradeGrid
 
 
@@ -27,7 +28,7 @@ class Center():
         }
 
         self.optimizer = Optimizer(self.strategies, self.logger,self.config)   
-        
+        self.runtask=TaskScheduler(self.strategies, self.logger,self.config)   
 
 
     async def run(self):        
