@@ -45,5 +45,5 @@ class Center():
         strategy = StockTradeGrid(self.logger)
  
         stocks = await strategy.import_stocks('D:/50.code/35.git78py/trade78/src/trade/Table.txt')
-        print(stocks)
+        #print(stocks)
         pass

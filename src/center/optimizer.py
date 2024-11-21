@@ -33,7 +33,7 @@ class Optimizer:
         up=UpInfo.getMaster() 
         up.getnumber=10
         dt=await up.send_back("apistock/stock/stock_trade/mForOptimizetimeAll")  
-        print (dt)
+        #print (dt)
         for row in dt:
             await self._run_task(row)
             continue
@@ -228,16 +228,6 @@ class Optimizer:
         log_entry.event.event_id = log_entry.card+kind
         tmp=await self.logger.WARN(log_entry)
         return
-        try:
-             
-            kind = task["kind"]
-            strategy:Strategy = self.strategies[kind]
-            strategy_instance = strategy(self.logger,debug=True)            
-            bestpar,bestpar2,bestpar3,bestpar4,bestpar5,bestpar6 =await self.__optimization(task,strategy_instance)
-            #保存算法当前状态  
-           
-        except Exception as e:
-            await self.logger.ERROR(f"Error stock _run_task : {e}")
-        return
+     
     
 

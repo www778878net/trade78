@@ -68,7 +68,7 @@ class TaskScheduler:
 
     async def __run_do(self, rt):
         """执行每个优化任务"""
-        #print(f"Processing task: {rt}")
+        
         #获取每个代码算法最小日期D
         dnow=datetime.datetime.now()
         dstart=rt["dval"]
