@@ -128,8 +128,17 @@ class Optimizer:
                     rt["val8"] = 0
                     rt["val9"] = 0
 
-                    for rv in dt:#日线循环             
-                        if(rv["tradedate"]<rt["dval"]):
+                    for rv in dt:#日线循环 
+                        try:
+                            tradedate = datetime.datetime.strptime(rv["tradedate"], "%Y-%m-%d").date()  # 转为 date 对象
+                            dval = datetime.datetime.strptime(rt["dval"], "%Y-%m-%d %H:%M:%S")  # 转为 datetime 对象
+                        except Exception as e:
+                            # 打印异常信息和 rv, rt 的值（所有内容在一行）
+                            print(f"Exception occurred: {e}, rv['tradedate']: {rv['tradedate']}, rt['dval']: {rt['dval']}")
+                            continue
+                        
+                             
+                        if(tradedate<dval ):
                             continue
                         rt["dval"] = rv["tradedate"]+" 00:00:00" 
                         if "lastval" not in rt:    rt["lastval"] = rv["close"] 
