@@ -100,6 +100,7 @@ class TaskScheduler:
         # 将字符串解析为 datetime 对象        
         dt_object = datetime.datetime.strptime(dstart, "%Y-%m-%d %H:%M:%S")        
         dstartUTC = dt_object.strftime("%Y-%m-%dT%H:%M:%SZ")
+        await self.logger.INFO(f"Stock_trade _run_task do :{card}")
         #获取日线
         up=UpInfo.getMaster() 
         up.getnumber=9999
@@ -108,7 +109,7 @@ class TaskScheduler:
         if(dt==None or dt==''):   
             return
         needsave=True
-        await self.logger.INFO(f"Stock_trade _run_task do :{card}")
+        
         for rv in dt:#日线循环
             dmin5=datetime.datetime.strptime(rv["tradedate"],'%Y-%m-%d')
             dval=datetime.datetime.strptime(rt["dval"],'%Y-%m-%d %H:%M:%S')
