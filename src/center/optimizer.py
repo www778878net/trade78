@@ -1,5 +1,6 @@
 import asyncio
 import queue
+import threading
 from log78 import Logger78
 from basic.config78 import Config78
 from basic.task_thread_pool import TaskThreadPool
@@ -9,9 +10,9 @@ import datetime
 from upinfopy import UpInfo, Api78
 
 class Optimizer:
-    def __init__(self, strategies, logger,config):
+    def __init__(self, strategies, logger:Logger78,config):
         self.strategies = strategies      
-        self.logger = logger
+        self.logger = logger.clone()
         self.config:Config78 = config
         self.task_queue = queue.Queue()
         self.thread_pool = TaskThreadPool(self._run_task, self.task_queue, max_workers=2, logger=self.logger)
@@ -39,8 +40,18 @@ class Optimizer:
             return
         
         self.dnext = current_time  # 更新时间标记
-        asyncio.create_task(self.__run())  # 通过 asyncio 调度 __run
-    
+            # 使用线程启动任务
+        thread = threading.Thread(target=self._run_in_thread, daemon=True)
+        thread.start()
+        #asyncio.create_task(self.__run())  # 通过 asyncio 调度 __run
+    def _run_in_thread(self):
+        """在后台运行异步任务"""
+        loop = asyncio.new_event_loop()  # 创建新事件循环
+        asyncio.set_event_loop(loop)    # 设置为当前线程事件循环
+        try:
+            loop.run_until_complete(self.__run())  # 运行协程
+        finally:
+            loop.close()  # 关闭事件循环
     async def __run(self):
         up=UpInfo.getMaster() 
         up.getnumber=10
