@@ -14,22 +14,22 @@ class Optimizer:
         self.strategies = strategies      
         self.logger = logger.clone()
         self.config:Config78 = config
-        self.task_queue = queue.Queue()
-        self.thread_pool = TaskThreadPool(self._run_task, self.task_queue, max_workers=2, logger=self.logger)
+        #self.task_queue = queue.Queue()
+        #self.thread_pool = TaskThreadPool(self._run_task, self.task_queue, max_workers=2, logger=self.logger)
         self.dnext =   datetime.datetime.now()- datetime.timedelta(days=1)  # 默认设置启动时运行一次
         
-    async def Taskrun(self):
-        """检查任务队列是否完成 并添加队列"""
-        if (datetime.datetime.now() - self.dnext).total_seconds() < 60:  # 每2分钟运行一次
-            return
-        self.dnext=datetime.datetime.now()  
-        if(self.thread_pool.get_queue_size()>=10):return 
-        up=UpInfo.getMaster() 
-        up.getnumber=10
-        dt=await up.send_back("apistock/stock/stock_trade/mForOptimizetimeAll")  
-        self._add_tasks(dt)
+    # async def Taskrun(self):
+    #     """检查任务队列是否完成 并添加队列"""
+    #     if (datetime.datetime.now() - self.dnext).total_seconds() < 60:  # 每2分钟运行一次
+    #         return
+    #     self.dnext=datetime.datetime.now()  
+    #     if(self.thread_pool.get_queue_size()>=10):return 
+    #     up=UpInfo.getMaster() 
+    #     up.getnumber=10
+    #     dt=await up.send_back("apistock/stock/stock_trade/mForOptimizetimeAll")  
+    #     self._add_tasks(dt)
 
-        return
+    #     return
     
     async def run(self):
         """检查任务队列是否完成，并添加任务队列"""
@@ -41,9 +41,11 @@ class Optimizer:
         
         self.dnext = current_time  # 更新时间标记
             # 使用线程启动任务
-        thread = threading.Thread(target=self._run_in_thread, daemon=True)
-        thread.start()
+        # thread = threading.Thread(target=self._run_in_thread, daemon=True)
+        # thread.start()
         #asyncio.create_task(self.__run())  # 通过 asyncio 调度 __run
+        await self._run()
+        return
     def _run_in_thread(self):
         """在后台运行异步任务"""
         loop = asyncio.new_event_loop()  # 创建新事件循环
@@ -54,7 +56,7 @@ class Optimizer:
             loop.close()  # 关闭事件循环
     async def __run(self):
         up=UpInfo.getMaster() 
-        up.getnumber=10
+        up.getnumber=5
         dt=await up.send_back("apistock/stock/stock_trade/mForOptimizetimeAll")  
         #print (dt)
         isAllok=True  

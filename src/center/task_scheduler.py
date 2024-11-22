@@ -28,10 +28,10 @@ class TaskScheduler:
             return
         
         self.dnext = current_time  # 更新时间标记
-        thread = threading.Thread(target=self._run_in_thread, daemon=True)
-        thread.start()
+        # thread = threading.Thread(target=self._run_in_thread, daemon=True)
+        # thread.start()
         #asyncio.create_task(self.__run())  # 通过 asyncio 调度 __run
-  
+        await self.__run()
         
         # up = UpInfo.getMaster() 
         # up.getnumber = 9999
@@ -61,7 +61,7 @@ class TaskScheduler:
         up = UpInfo.getMaster()           
         up.order="dval"
         up.set_par(dover)
-        up.getnumber = 100
+        up.getnumber = 50
         dtTrade =await up.send_back("apistock/stock/stock_trade/getByTrade", up) 
         dtTrade= json.loads(dtTrade)  # 返回JSON格式的数据
         for rt in dtTrade:#算法循环 
