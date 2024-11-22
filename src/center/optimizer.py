@@ -44,7 +44,7 @@ class Optimizer:
         # thread = threading.Thread(target=self._run_in_thread, daemon=True)
         # thread.start()
         #asyncio.create_task(self.__run())  # 通过 asyncio 调度 __run
-        await self._run()
+        await self.__run()
         return
     def _run_in_thread(self):
         """在后台运行异步任务"""
