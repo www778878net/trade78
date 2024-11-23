@@ -8,7 +8,7 @@ WORKDIR /app
 COPY src /app/src
 
 # 设置环境变量
-ENV APP_ENV=development
+ENV APP_ENV=production
 
 
 # 暴露应用程序端口（如果需要）
