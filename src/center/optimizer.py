@@ -56,7 +56,7 @@ class Optimizer:
             loop.close()  # 关闭事件循环
     async def __run(self):
         up=UpInfo.getMaster() 
-        up.getnumber=5
+        up.getnumber=3#这里直接是调整减几天 每次只获取一个
         dt=await up.send_back("apistock/stock/stock_trade/mForOptimizetimeAll")  
         #print (dt)
         isAllok=True  
