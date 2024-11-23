@@ -98,14 +98,9 @@ class TaskScheduler:
         strategy_instance = strategy(self.logger,debug=True)
         line=rt["line"]      
         #if rt["kind"]!="grid":                continue
-        if(dstart=="0001-01-01 00:00:00"  ):
-            yearstart=str(int(dnow.strftime('%Y'))-4)
-            dstart=yearstart+"-01-01 00:00:00"
-            rt["dval"]=dstart
+        #if(dstart=="0001-01-01 00:00:00"  ):
+        dstartUTC = (datetime.datetime.now() - datetime.timedelta(days=4*365)).replace(month=1, day=1, hour=0, minute=0, second=0).strftime("%Y-%m-%dT%H:%M:%SZ")
 
-        # 将字符串解析为 datetime 对象        
-        dt_object = datetime.datetime.strptime(dstart, "%Y-%m-%d %H:%M:%S")        
-        dstartUTC = dt_object.strftime("%Y-%m-%dT%H:%M:%SZ")
         await self.logger.INFO(f"Stock_trade _run_task do :{card}")
         #获取日线
         up=UpInfo.getMaster() 
