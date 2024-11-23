@@ -55,6 +55,12 @@ class TaskScheduler:
         dover=datetime.datetime.now() 
         hour=int(dover.strftime('%H')  )
         if(hour<15):dover-= datetime.timedelta(days=1)
+        # 判断当前日期是否为周六或周日
+        if dover.weekday() == 5:  # 周六
+            dover -= datetime.timedelta(days=1)  # 调整到周五
+        elif dover.weekday() == 6:  # 周日
+            dover -= datetime.timedelta(days=2)  # 调整到周五
+
         dover=dover.strftime('%Y-%m-%d 00:00:00')
 
         isAllok=True        
@@ -106,7 +112,7 @@ class TaskScheduler:
         up.getnumber=9999
         up.set_par(card,dstartUTC)
         dt=await up.send_back("apistock/stock/stock_data_day/getByCardAll") 
-        if(dt==None or dt==''):   
+        if(len(dt)==0 or  dt==None or dt==''):   
             return
         needsave=True
         

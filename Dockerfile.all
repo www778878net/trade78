@@ -32,7 +32,7 @@ RUN poetry install --without dev
 RUN ls -l /app && ls -l /app/src 
 
 # 设置环境变量
-ENV APP_ENV=development
+ENV APP_ENV=production
 # ENV logstash_host=192.168.31.181
 # ENV logstash_port=30003
 
