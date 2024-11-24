@@ -237,8 +237,8 @@ class Optimizer:
         log_entry.par4 = bestpar4
         log_entry.par5 = bestpar5
         log_entry.par6 = bestpar6
-        # 修改字段值
-        log_entry.optimizetime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')   # 优化时间
+        # 时区简单点处理了算
+        log_entry.optimizetime = (datetime.datetime.now()- datetime.timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S')   # 优化时间
         log_entry.winval = 0                            # 算法利润
         log_entry.upnum = 0                             # 上升数量
         log_entry.downnum = 0                           # 下降数量
