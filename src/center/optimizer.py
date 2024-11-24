@@ -66,9 +66,9 @@ class Optimizer:
             continue
         if(isAllok):
             await self.logger.INFO("Stock_Trade Optimizer allok")
-            self.dnext=datetime.datetime.now() + datetime.timedelta(minutes=10)
+            self.dnext=datetime.datetime.now() #+ datetime.timedelta(minutes=10)
         else:
-            self.dnext=datetime.datetime.now() + datetime.timedelta(minutes=1)
+            self.dnext=datetime.datetime.now() - datetime.timedelta(minutes=100)
         return
 
     def _add_tasks(self, tasks):

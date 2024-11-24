@@ -70,20 +70,19 @@ class TaskScheduler:
         up.getnumber = 50
         dtTrade =await up.send_back("apistock/stock/stock_trade/getByTrade", up) 
         dtTrade= json.loads(dtTrade)  # 返回JSON格式的数据
-        for rt in dtTrade:#算法循环 
-            self.dnext = datetime.datetime.now()
+        for rt in dtTrade:#算法循环             
             with open('/tmp/healthy', 'w') as f:
                 f.write('healthy')
-            self.dnext=datetime.datetime.now() + datetime.timedelta(minutes=10)
+            self.dnext=datetime.datetime.now() # + datetime.timedelta(minutes=10)
             await self.__run_do(rt)
             #self._log.add("Stock_Trade __run go over"+rt["card"]+rt["dval"]) 
             isAllok=False
             continue
         if(isAllok):
             await self.logger.INFO("Stock_Trade __run allok")
-            self.dnext=datetime.datetime.now() + datetime.timedelta(minutes=10)
+            self.dnext=datetime.datetime.now() #+ datetime.timedelta(minutes=10)
         else:
-            self.dnext=datetime.datetime.now() + datetime.timedelta(minutes=1)
+            self.dnext=datetime.datetime.now() - datetime.timedelta(minutes=50)
         return
 
     async def __run_do(self, rt):
