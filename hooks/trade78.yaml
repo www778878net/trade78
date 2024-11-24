@@ -29,6 +29,8 @@ spec:
           value: "15d647fd-946d-93f6-2413-1a704fd65816"  
         - name: uname
           value: "systestvps"  
+        - name: BOOTSTRAP_SERVERS
+          value: "kafka.default.svc.cluster.local:9094"  
         resources:
           requests:
             memory: "64Mi"
