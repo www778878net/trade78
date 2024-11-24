@@ -24,7 +24,7 @@ class TaskScheduler:
         current_time = datetime.datetime.now()
         
         # 每分钟运行一次优化任务
-        if (current_time - self.dnext).total_seconds() < 600:
+        if (current_time - self.dnext).total_seconds() < 120:
             return
         
         self.dnext = current_time  # 更新时间标记
