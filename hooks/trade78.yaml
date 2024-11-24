@@ -23,6 +23,8 @@ spec:
         env:
         - name: APP_ENV
           value: "development"
+        - name: APP_MODE
+          value: "runtask"  # 这里控制模式，值可以是 "run" 或 "test"
         resources:
           requests:
             memory: "64Mi"
