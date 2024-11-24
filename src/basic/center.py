@@ -1,4 +1,5 @@
 import json
+import os
 from upinfopy import UpInfo, Api78
 from log78 import Logger78
 import time
@@ -33,8 +34,11 @@ class Center():
 
     async def run(self):        
         """主循环逻辑"""
-        await self.runtask.run()
-        await self.optimizer.run()
+        mode=os.getenv('APP_MODE', self.config.get('DEFAULT', 'APP_MODE', 'runtask')).lower()
+        if(mode=="runtask"):
+            await self.runtask.run()
+        elif(mode=="optimizer"):
+            await self.optimizer.run()
         
         
         #await self.test()
