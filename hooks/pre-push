@@ -90,6 +90,15 @@ if [ \$? -ne 0 ]; then
 fi
 echo "Kubernetes 应用更新成功"
 EOF
+
+    ssh -i D:/tmp7788doc/BaiduSyncdisk/1.imp/keys/7788/202410 -p 2213 root@192.168.31.181 << EOF
+kubectl set image deployment/stockoptimizer-app stockoptimizer=$REPO_URL/$IMAGE_NAME:$new_version
+if [ \$? -ne 0 ]; then
+  echo "更新 Kubernetes 应用失败"
+  exit 1
+fi
+echo "Kubernetes 应用更新成功"
+EOF
     if [ $? -ne 0 ]; then
         echo "SSH 连接或命令执行失败，推送已中止"
         exit 1
