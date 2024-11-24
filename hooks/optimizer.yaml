@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: trade78-app
+  name: stockoptimizer-app
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: trade78
+      app: stockoptimizer
   template:
     metadata:
       labels:
-        app: trade78
+        app: stockoptimizer
     spec:
       imagePullSecrets:
         - name: my-registry-secret
       containers:
-      - name: trade78
+      - name: stockoptimizer
         image: crpi-3zr415nakxg4qr8l.cn-hangzhou.personal.cr.aliyuncs.com/7788soft/trade78:latest
         imagePullPolicy: Always  # 强制拉取最新镜像
         ports:
@@ -24,7 +24,7 @@ spec:
         - name: APP_ENV
           value: "development"
         - name: APP_MODE
-          value: "runtask"  # 这里控制模式，值可以是 "run" 或 "test"
+          value: "optimizer"  # 这里控制模式，值可以是 "run" 或 "test"
         - name: sid
           value: "15d647fd-946d-93f6-2413-1a704fd65816"  
         - name: uname
