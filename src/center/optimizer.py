@@ -13,6 +13,7 @@ class Optimizer:
     def __init__(self, strategies, logger:Logger78,config):
         self.strategies = strategies      
         self.logger = logger.clone()
+        print (self.logger.server_logger.server_url)
         self.config:Config78 = config
         #self.task_queue = queue.Queue()
         #self.thread_pool = TaskThreadPool(self._run_task, self.task_queue, max_workers=2, logger=self.logger)

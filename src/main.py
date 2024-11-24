@@ -45,6 +45,7 @@ if use_kafka_log:
         FileLog78(),
         ConsoleLog78()
     )
+    print (logger.server_logger.server_url)
 else:
     logger.setup(
         None,
