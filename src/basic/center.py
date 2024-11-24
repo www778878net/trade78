@@ -38,8 +38,6 @@ class Center():
         if(mode=="runtask"):
             await self.runtask.run()
         elif(mode=="optimizer"):
-            bootstrap_servers = os.getenv('BOOTSTRAP_SERVERS', self.config.get('DEFAULT', 'bootstrap_servers', '192.168.31.181:30008')).lower()
-            print(mode+bootstrap_servers)
             await self.optimizer.run()
         
         
