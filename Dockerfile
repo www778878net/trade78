@@ -8,8 +8,8 @@ WORKDIR /app
 COPY src /app/src
 
 # 设置环境变量
-ENV APP_ENV=production
-
+ENV APP_ENV="production"
+ENV BOOTSTRAP_SERVERS="kafka.default.svc.cluster.local:9094"     
 
 # 暴露应用程序端口（如果需要）
 # EXPOSE 8000
