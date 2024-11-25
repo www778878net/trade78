@@ -54,7 +54,7 @@ class TaskScheduler:
         u"""5分钟一次实时交易""" 
         dover=datetime.datetime.now() 
         hour=int(dover.strftime('%H')  )
-        if(hour<15):dover-= datetime.timedelta(days=1)
+        if(hour<17):dover-= datetime.timedelta(days=1)
         # 判断当前日期是否为周六或周日
         if dover.weekday() == 5:  # 周六
             dover -= datetime.timedelta(days=1)  # 调整到周五
