@@ -64,7 +64,7 @@ async def main():
         with open('/tmp/healthy', 'w') as f:
             f.write('healthy')
    
-        await asyncio.sleep(1)  # 等待一秒钟
+        await asyncio.sleep(10)  # 等待一秒钟
 
 def init():  
     up = UpInfo()
