@@ -194,6 +194,7 @@ class Optimizer:
                     log_entry.allnum = rt["allnum"]
                     log_entry.winnum = rt["winnum"]
                     log_entry.winsum = rt["winsum"]
+                    log_entry.worker =''
                     log_entry.event.event_id = log_entry.card + "_" + str(log_entry.par) + "_" + str(log_entry.par2) + "_" + str(log_entry.par3) + "_" + str(log_entry.par4) + "_" + str(log_entry.par5)
                     await self.logger.WARN(log_entry)
                     # up=UpInfo.getMaster() 
@@ -259,6 +260,7 @@ class Optimizer:
         log_entry.allnum = 0                            # 总数
         log_entry.winnum = 0                            # 胜利次数
         log_entry.winsum = 0                            # 赢利总和
+
         log_entry.event.event_id = log_entry.card+kind
         tmp=await self.logger.WARN(log_entry)
         return
