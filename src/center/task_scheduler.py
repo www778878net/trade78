@@ -156,6 +156,7 @@ class TaskScheduler:
         log_entry.allnum = rt["allnum"]  # 总数
         log_entry.winnum = rt["winnum"]  # 胜利次数
         log_entry.winsum = rt["winsum"]  # 赢利总和
+        log_entry.douser=""
         log_entry.event.event_id = log_entry.card+log_entry.kind
         tmp=await self.logger.WARN(log_entry)
         return
