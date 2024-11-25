@@ -57,9 +57,9 @@ class TaskScheduler:
             dover -= datetime.timedelta(days=1)  # 调整到周五
         elif dover.weekday() == 6:  # 周日
             dover -= datetime.timedelta(days=2)  # 调整到周五
-
+        print(dover)
         dover=dover.strftime('%Y-%m-%d 00:00:00')
-
+        
         isAllok=True        
         up = UpInfo.getMaster()           
         up.order="dval"

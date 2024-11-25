@@ -30,7 +30,7 @@ spec:
         - name: uname
           value: "systestvps"  
         - name: BOOTSTRAP_SERVERS
-          value: "kafka.default.svc.cluster.local:9094"  
+          value: "kafka.default.svc.cluster.local:9092"  
         - name: USE_KAFKA_LOG
           value: "true"
         resources:
