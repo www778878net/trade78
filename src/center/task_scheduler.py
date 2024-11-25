@@ -33,10 +33,7 @@ class TaskScheduler:
         #asyncio.create_task(self.__run())  # 通过 asyncio 调度 __run
         await self.__run()
         
-        # up = UpInfo.getMaster() 
-        # up.getnumber = 9999
-        # dt = await up.send_back("apistock/stock/stock_trade/getByTrade")  
-        # self._add_tasks(dt)
+   
         return
     
     def _run_in_thread(self):
@@ -76,13 +73,13 @@ class TaskScheduler:
             self.dnext=datetime.datetime.now() # + datetime.timedelta(minutes=10)
             await self.__run_do(rt)
             #self._log.add("Stock_Trade __run go over"+rt["card"]+rt["dval"]) 
-            isAllok=False
+            isAllok=False            
             continue
         if(isAllok):
             await self.logger.INFO("Stock_Trade __run allok")
-            self.dnext=datetime.datetime.now() #+ datetime.timedelta(minutes=10)
+            self.dnext=datetime.datetime.now() + datetime.timedelta(minutes=10)
         else:
-            self.dnext=datetime.datetime.now() - datetime.timedelta(minutes=50)
+            self.dnext=datetime.datetime.now() #- datetime.timedelta(minutes=50)
         return
 
     async def __run_do(self, rt):
