@@ -44,7 +44,7 @@ class StockTradeGrid(Strategy):
         
         # 计算当前价格所在的网格
         grid_index = int((vclose - val2) / grid_size)
-          # 定义增仓和减仓的区间
+          # 定义增仓和减仓的区间0-9
         buy_index = 10 - grid_index-1  # 增仓区间
        
         # 当前持仓量 1~10
@@ -58,7 +58,7 @@ class StockTradeGrid(Strategy):
         
         if(areagrid<buy_index ):            
             multiple=buy_index-areagrid
-            reason='开仓'+str(multiple)+'份'
+            reason='开仓'+str(multiple)+'份'+str(areagrid)
             opennum=opennum*multiple
             rt["upval"]=(upval*upnum+opennum*openval)/(upnum+opennum)
             rt["upnum"]=upnum+opennum
@@ -82,7 +82,7 @@ class StockTradeGrid(Strategy):
         if(areagrid<=sell_index):return
         #平仓
         multiple=areagrid-sell_index
-        reason='平仓'+str(multiple)+'份'
+        reason='平仓'+str(multiple)+'份'+str(areagrid)
         if(sell_index==0):#全平
             opennum=upnum
         else:
