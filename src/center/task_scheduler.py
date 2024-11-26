@@ -79,7 +79,7 @@ class TaskScheduler:
             await self.logger.INFO("Stock_Trade __run allok")
             self.dnext=datetime.datetime.now() + datetime.timedelta(minutes=10)
         else:
-            self.dnext=datetime.datetime.now() #- datetime.timedelta(minutes=50)
+            self.dnext=datetime.datetime.now() - datetime.timedelta(minutes=50)
         return
 
     async def __run_do(self, rt):
