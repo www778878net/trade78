@@ -1,52 +1,43 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: batch/v1
+kind: CronJob
 metadata:
-  name: trade78-app
+  name: trade78-job
 spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: trade78
-  template:
-    metadata:
-      labels:
-        app: trade78
+  schedule: "*/10 17-23 * * 1-5"  # 周一到周五每天 17:00 到 23:59 每 10 分钟执行一次
+  successfulJobsHistoryLimit: 1  # 保留最近一次成功的Job和Pod
+  failedJobsHistoryLimit: 1  # 保留最近一次失败的Job和Pod
+  concurrencyPolicy: Forbid  # 确保前一个任务完成之前不会启动新的任务
+  jobTemplate:
     spec:
-      imagePullSecrets:
-        - name: my-registry-secret
-      containers:
-      - name: trade78
-        image: crpi-3zr415nakxg4qr8l.cn-hangzhou.personal.cr.aliyuncs.com/7788soft/trade78:latest
-        imagePullPolicy: Always  # 强制拉取最新镜像
-        ports:
-        - containerPort: 80
-        env:
-        - name: APP_ENV
-          value: "development"
-        - name: APP_MODE
-          value: "runtask"  # 这里控制模式，值可以是 "run" 或 "test"
-        - name: sid
-          value: "15d647fd-946d-93f6-2413-1a704fd65816"  
-        - name: uname
-          value: "systestvps"  
-        - name: BOOTSTRAP_SERVERS
-          value: "kafka.default.svc.cluster.local:9092"  
-        - name: USE_KAFKA_LOG
-          value: "true"
-        resources:
-          requests:
-            memory: "64Mi"
-            cpu: "50m"
-          limits:
-            memory: "256Mi"
-            cpu: "500m"
-        livenessProbe:
-          exec:
-            command:
-            - python
-            - -c
-            - "import os; import time; last_modified = os.path.getmtime('/tmp/healthy'); os._exit(0) if time.time() - last_modified < 60 else os._exit(1)"
-          initialDelaySeconds: 30
-          periodSeconds: 30  # 检测间隔时间改为30秒
-          failureThreshold: 6  # 3次失败才算失败
-   
+      template:
+        metadata:
+          labels:
+            app: trade78
+        spec:
+          imagePullSecrets:
+            - name: my-registry-secret
+          containers:
+          - name: trade78
+            image: crpi-3zr415nakxg4qr8l.cn-hangzhou.personal.cr.aliyuncs.com/7788soft/trade78:latest
+            imagePullPolicy: Always  # 确保始终使用最新的镜像
+            env:
+            - name: APP_ENV
+              value: "production"  # 切换为生产环境
+            - name: APP_MODE
+              value: "runtask"
+            - name: sid
+              value: "15d647fd-946d-93f6-2413-1a704fd65816"
+            - name: uname
+              value: "systestvps"
+            - name: BOOTSTRAP_SERVERS
+              value: "kafka.default.svc.cluster.local:9092"
+            - name: USE_KAFKA_LOG
+              value: "true"
+            resources:
+              requests:
+                memory: "128Mi"  # 提高内存请求和限制，适应生产负载
+                cpu: "100m"
+              limits:
+                memory: "512Mi"
+                cpu: "1"
+          restartPolicy: OnFailure  # 仅在任务失败时重试
