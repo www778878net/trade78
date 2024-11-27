@@ -59,12 +59,12 @@ async def main():
     with open('/tmp/healthy', 'w') as f:
         f.write('healthy')    
     center = Center(logger,config)
-    while True:
-        await center.run()        
-        with open('/tmp/healthy', 'w') as f:
-            f.write('healthy')
+    #while True:
+    await center.run()        
+        # with open('/tmp/healthy', 'w') as f:
+        #     f.write('healthy')
    
-        await asyncio.sleep(10)  # 等待一秒钟
+        # await asyncio.sleep(10)  # 等待一秒钟
 
 def init():  
     up = UpInfo()

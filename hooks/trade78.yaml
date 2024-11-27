@@ -3,7 +3,7 @@ kind: CronJob
 metadata:
   name: trade78-job
 spec:
-  schedule: "*/10 17-23 * * 1-5"  # 周一到周五每天 17:00 到 23:59 每 10 分钟执行一次
+  schedule: "*/10 9-15 * * 1-5"  # 周一到周五每天 17:00 到 23:59 每 10 分钟执行一次
   successfulJobsHistoryLimit: 1  # 保留最近一次成功的Job和Pod
   failedJobsHistoryLimit: 1  # 保留最近一次失败的Job和Pod
   concurrencyPolicy: Forbid  # 确保前一个任务完成之前不会启动新的任务
@@ -21,6 +21,8 @@ spec:
             image: crpi-3zr415nakxg4qr8l.cn-hangzhou.personal.cr.aliyuncs.com/7788soft/trade78:latest
             imagePullPolicy: Always  # 确保始终使用最新的镜像
             env:
+            - name: TZ
+              value: "Asia/Shanghai"  # 设置容器时区为北京时间
             - name: APP_ENV
               value: "production"  # 切换为生产环境
             - name: APP_MODE
