@@ -1,5 +1,5 @@
 # 基于最新的镜像
-FROM crpi-3zr415nakxg4qr8l.cn-hangzhou.personal.cr.aliyuncs.com/7788soft/trade78:latest
+FROM crpi-3zr415nakxg4qr8l.cn-hangzhou.personal.cr.aliyuncs.com/7788soft/trade78:0.1.50
 
 # 设置工作目录
 WORKDIR /app
