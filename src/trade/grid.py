@@ -69,7 +69,7 @@ class StockTradeGrid(Strategy):
                 rt["upval"] = (rt["upval"] * rt["upnum"] + opennum * openval) / (rt["upnum"] + opennum)
                 rt["upnum"] += opennum
                 rt["val3"] = idx  # 更新当前持仓区间
-                remark = f"{vclose} 达到条件开仓数 {rt['upnum']}，开仓价格 {openval}"
+                remark = f"{vclose} 达到条件开仓数 {rt['upnum']} 价{rt["upval"] }，开仓价格 {openval}"
 
                 if isclosewarn:
                     rt["todayopen"] = True  # 今天开仓
@@ -99,7 +99,7 @@ class StockTradeGrid(Strategy):
             rt["winval"] += (closeval - upval) * opennum - closeval * opennum * 0.002  # 计算平仓盈亏
             rt["upnum"] -= opennum  # 更新持仓数量
             rt["val3"] = idx  # 更新当前持仓区间
-            remark = f"{vclose} 达到条件平仓数 {rt['upnum']}，平仓价格 {closeval}"
+            remark = f"{vclose} 达到条件平仓 数 {rt['upnum']} 价{rt["upval"] }，平仓价格 {closeval}"
 
             if isclosewarn:
                 rt["todayclose"] = True  # 今天平仓
@@ -113,7 +113,7 @@ class StockTradeGrid(Strategy):
                 log_entry.num = rt["upnum"]
                 log_entry.reason = reason
                 log_entry.winval = rt["winval"]
-                log_entry.remark = str(vclose) + " 平仓 余股数 " + str(upnum)
+                log_entry.remark = remark
                 await self.logger.WARN(log_entry)
         
         pass
