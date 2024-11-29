@@ -53,62 +53,69 @@ class StockTradeGrid(Strategy):
         
         if(areagrid==sell_index):return
 
-        opennum=int(100000/vclose)  # 向下取整
-        openval=vclose
+        #opennum=int(100000/vclose)  # 向下取整
+        #openval=vclose
         
         if(areagrid<buy_index ):            
-            multiple=buy_index-areagrid
-            reason='开仓'+str(multiple)+'份'+str(areagrid)
-            opennum=opennum*multiple
-            rt["upval"]=(upval*upnum+opennum*openval)/(upnum+opennum)
-            rt["upnum"]=upnum+opennum
-            rt["val3"]=buy_index
-            remark=str(vclose)+"达到条件开仓数" +str(opennum)   
-            if( isclosewarn  ):    
-                rt["todayopen"]=True#今天开仓
-            if(issave):
+            # 逐步增仓直到买入区间
+            for idx in range(areagrid + 1, buy_index + 1):
+                # 计算该网格的开仓价格
+                # 假设网格的价格为 val2 + (idx + 1) * grid_size
+                openval = val1 - idx * grid_size               
+                reason = f'开仓  第 {idx} 区，开仓价格 {openval}'
+
+                opennum = int(100000/openval)  
+                # 更新加权平均开仓价
+                rt["upval"] = (rt["upval"] * rt["upnum"] + opennum * openval) / (rt["upnum"] + opennum)
+                rt["upnum"] += opennum
+                rt["val3"] = idx  # 更新当前持仓区间
+                remark = f"{vclose} 达到条件开仓数 {rt['upnum']}，开仓价格 {openval}"
+
+                if isclosewarn:
+                    rt["todayopen"] = True  # 今天开仓
+                if issave:
+                    log_entry = HistoryLogEntry()
+                    log_entry.card = card
+                    log_entry.kind = self.kind
+                    log_entry.dtime = dval
+                    log_entry.price = openval
+                    log_entry.num = rt["upnum"]
+                    log_entry.reason = reason
+                    log_entry.winval = winval
+                    log_entry.remark = remark
+                    await self.logger.WARN(log_entry)
+            return
+        
+        if(areagrid<=sell_index):return
+         # 逐步减仓直到卖出区间
+        for idx in range(areagrid - 1, sell_index - 1, -1):  # 从当前区间向下逐步平仓
+            # 计算该网格的平仓价格
+            # 假设网格的价格为 val2 + (idx + 1) * grid_size
+            closeval = val1 - idx  * grid_size            
+            reason = f'平仓 第 {idx+1} 区，平仓价格 {closeval}'
+
+            opennum = int(100000/closeval)  
+            # 更新加权平均开仓价（减仓时可以更新平仓的金额和数量）
+            rt["winval"] += (closeval - upval) * opennum - closeval * opennum * 0.002  # 计算平仓盈亏
+            rt["upnum"] -= opennum  # 更新持仓数量
+            rt["val3"] = idx  # 更新当前持仓区间
+            remark = f"{vclose} 达到条件平仓数 {rt['upnum']}，平仓价格 {closeval}"
+
+            if isclosewarn:
+                rt["todayclose"] = True  # 今天平仓
+
+            if issave:
                 log_entry = HistoryLogEntry()
                 log_entry.card = card
                 log_entry.kind = self.kind
                 log_entry.dtime = dval
-                log_entry.price = openval
-                log_entry.num = opennum
+                log_entry.price = closeval
+                log_entry.num = rt["upnum"]
                 log_entry.reason = reason
-                log_entry.winval = winval
-                log_entry.remark = remark
+                log_entry.winval = rt["winval"]
+                log_entry.remark = str(vclose) + " 平仓 余股数 " + str(upnum)
                 await self.logger.WARN(log_entry)
-            return
         
-        if(areagrid<=sell_index):return
-        #平仓
-        multiple=areagrid-sell_index
-        reason='平仓'+str(multiple)+'份'+str(areagrid)
-        if(sell_index==0):#全平
-            opennum=upnum
-        else:
-            opennum=opennum*multiple
-        winval=(openval - upval)*opennum-openval*opennum *0.002 
-        rt["allnum"]+=1 
-        if(openval>=upval):
-            rt["winsum"]+=winval#赢利总和(不计亏损)算凯利公式
-            rt["winnum"]+=1
-        rt["upnum"]=rt["upnum"]-opennum
-        rt["winval"]+=winval
-        rt["val3"]=sell_index
-        if( isclosewarn  ): 
-            rt["todayclose"]=True
-        if(issave):
-            log_entry = HistoryLogEntry()
-            log_entry.card = card
-            log_entry.kind = self.kind
-            log_entry.dtime = dval
-            log_entry.price = openval
-            log_entry.num = rt["upnum"]
-            log_entry.reason = reason
-            log_entry.winval = rt["winval"]
-            log_entry.remark = str(vclose)+" 平仓" +str(upnum) 
-            await self.logger.WARN(log_entry)    
-            
         pass
 
     def refgrid(self,rt,dt):
