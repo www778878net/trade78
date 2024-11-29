@@ -72,7 +72,7 @@ class Strategy:
             for line in file:
                 stock = line.strip()
                 if stock:
-                    stock=stock[2:]  # 去除前两位字符
+                    #stock=stock[2:]  # 去除前两位字符
                     log_entry = TradeLogEntry()
                     log_entry.kind = self.kind
                     log_entry.card = stock
@@ -157,7 +157,7 @@ class TradeLogEntry(LogEntry):
         self.status = ''#当前状态好象没用
         self.douser = ''#分布式用户名 这个是算算法的
         self.worker = ''#分布式用户名(这个是算优化参数的)  
-        self.optimizetime = '0001-01-01 00:00:00'#优化时间
+        self.optimizetime = '1900-01-01 00:00:00'#优化时间
         self.iswarnwx = 0#达到算法条件是否微信告警
         self.winnum = 0
         self.allnum = 0

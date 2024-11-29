@@ -34,6 +34,8 @@ class Center():
 
     async def run(self):        
         """主循环逻辑"""
+        #await self.test()
+
         mode=os.getenv('APP_MODE', self.config.get('DEFAULT', 'APP_MODE', 'runtask')).lower()
         if(mode=="runtask"):
             await self.runtask.run()
@@ -41,7 +43,7 @@ class Center():
             await self.optimizer.run()
         
         
-        #await self.test()
+        
         #await self.optimizer.run()        
         return False
   
@@ -49,6 +51,6 @@ class Center():
         """测试"""
         strategy = StockTradeGrid(self.logger)
  
-        stocks = await strategy.import_stocks('D:/50.code/35.git78py/trade78/src/trade/Table.txt')
+        stocks = await strategy.import_stocks('D:/50.code/15.trade/trade78/src/trade/Table.txt')
         #print(stocks)
         pass
