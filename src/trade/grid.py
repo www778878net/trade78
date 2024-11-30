@@ -64,7 +64,7 @@ class StockTradeGrid(Strategy):
                 openval = val1 - idx * grid_size               
                 reason = f'开仓  第 {idx} 区，开仓价格 {openval}'
 
-                opennum = int(100000/openval)  
+                opennum = int(100000*idx/openval-rt["upnum"])  
                 # 更新加权平均开仓价
                 rt["upval"] = (rt["upval"] * rt["upnum"] + opennum * openval) / (rt["upnum"] + opennum)
                 rt["upnum"] += opennum
@@ -94,7 +94,8 @@ class StockTradeGrid(Strategy):
             closeval = val1 - idx  * grid_size            
             reason = f'平仓 第 {idx+1} 区，平仓价格 {closeval}'
 
-            opennum = int(100000/closeval)  
+            #opennum = int(100000/closeval)  
+            opennum =rt["upnum"]- int(100000*idx/closeval)  
             # 更新加权平均开仓价（减仓时可以更新平仓的金额和数量）
             rt["winval"] += (closeval - upval) * opennum - closeval * opennum * 0.002  # 计算平仓盈亏
             rt["upnum"] -= opennum  # 更新持仓数量

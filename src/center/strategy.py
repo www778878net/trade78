@@ -84,6 +84,9 @@ class Strategy:
                     log_entry.par5 = par5list[0]
                     log_entry.par6 = par6list[0]
                     log_entry.event.event_id = log_entry.card+self.kind
+                    log_entry.douser="test"
+                    log_entry.worker="worker"
+                    log_entry.basic.log_index = "stock_trade-v3"
                     await self.logger.WARN(log_entry)
                     continue
         return stocks   
