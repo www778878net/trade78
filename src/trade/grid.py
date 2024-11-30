@@ -40,84 +40,134 @@ class StockTradeGrid(Strategy):
 
             # 如果格子仍然小于10%且调整后的格子大小依然很小，则退出
             if grid_size < val1 * 0.01:
-                return  # 格子过小，退出
+                return  # 格子过小，退出 
         
-        # 计算当前价格所在的网格
+        val3 =rt["val3"] #当前区间
+        high=rv["high"] 
+        # 平仓处理
+        close_count, total_profit, close_times = await self.close_position(rt, rv, high, val1, grid_size, isclosewarn, issave, isclose,val2,val3)
+        lower=rv["low"]
+        # 开仓处理
+        open_count, open_price, open_times = await self.open_position(rt, rv, lower, val1, grid_size,  isclosewarn, issave, isclose,val2,val3)
+
+        # 重新计算当前持仓区间和数量，价格，盈利等
+        if( rt["upnum"] + open_count - close_count >0):
+            rt["upval"] = (rt["upval"] * rt["upnum"] + open_count * open_price - close_count * rt["upval"] ) / ( rt["upnum"] + open_count - close_count  )
+        rt["upnum"] = rt["upnum"] + open_count - close_count        
+        rt["winval"] += total_profit
+        rt["val3"] = rt["val3"]+open_times-close_times
+
+        #收盘价只判断开不用判断平了
+        val3 =rt["val3"] #当前区间
+        #close_count, total_profit, close_times = await self.close_position(rt, rv, vclose, val1, grid_size, isclosewarn, issave, isclose,val2,val3)
+        open_count, open_price, open_times = await self.open_position(rt, rv, vclose, val1, grid_size,  isclosewarn, issave, isclose,val2,val3)
+        if(open_times==0):
+            return
+        # 重新计算当前持仓区间和数量，价格，盈利等
+        rt["upval"] = (rt["upval"] * rt["upnum"] + open_count * open_price ) / ( rt["upnum"] + open_count   )
+        rt["upnum"] = rt["upnum"] + open_count       
+        #rt["winval"] += total_profit
+        rt["val3"] = rt["val3"]+open_times
+
+        return
+
+    async def open_position(self,rt, rv, vclose, val1, grid_size,  isclosewarn, issave, isclose,val2,val3):
+                 # 计算当前价格所在的网格
         grid_index = int((vclose - val2) / grid_size)
           # 定义增仓和减仓的区间0-9
         buy_index = 10 - grid_index-1  # 增仓区间
        
         # 当前持仓量 1~10
         sell_index=10-grid_index  # 减仓区间
-        areagrid=rt["val3"]        
+        areagrid=val3      
+
+        open_count = 0 #开仓数
+        open_price = 0 #开仓均价
+        open_times = 0  #开仓次数
         
-        if(areagrid==sell_index):return
-
-        #opennum=int(100000/vclose)  # 向下取整
-        #openval=vclose
+        havanum=rt["upnum"]
+        upval=rt["upval"]
+        if(areagrid>=buy_index):return open_count, open_price, open_times
         
-        if(areagrid<buy_index ):            
-            # 逐步增仓直到买入区间
-            for idx in range(areagrid + 1, buy_index + 1):
-                # 计算该网格的开仓价格
-                # 假设网格的价格为 val2 + (idx + 1) * grid_size
-                openval = val1 - idx * grid_size               
-                reason = f'开仓  第 {idx} 区，开仓价格 {openval}'
 
-                opennum = int(100000*idx/openval-rt["upnum"])  
-                # 更新加权平均开仓价
-                rt["upval"] = (rt["upval"] * rt["upnum"] + opennum * openval) / (rt["upnum"] + opennum)
-                rt["upnum"] += opennum
-                rt["val3"] = idx  # 更新当前持仓区间
-                remark = f"{vclose} 达到条件开仓数 {rt['upnum']} 价{rt["upval"] }，开仓价格 {openval}"
+        for idx in range(rt["val3"] + 1, buy_index + 1):
+            openval = val1 - idx * grid_size
+            opennum = int(100000 * idx / openval - havanum)
+            if(opennum<=0):#亏了有可能就不能开仓
+                continue
+            upval = (upval * havanum+ opennum * openval) / (havanum + opennum)
+            havanum += opennum
 
-                if isclosewarn:
-                    rt["todayopen"] = True  # 今天开仓
-                if issave:
-                    log_entry = HistoryLogEntry()
-                    log_entry.card = card
-                    log_entry.kind = self.kind
-                    log_entry.dtime = dval
-                    log_entry.price = openval
-                    log_entry.num = rt["upnum"]
-                    log_entry.reason = reason
-                    log_entry.winval = winval
-                    log_entry.remark = remark
-                    await self.logger.WARN(log_entry)
-            return
-        
-        if(areagrid<=sell_index):return
-         # 逐步减仓直到卖出区间
-        for idx in range(areagrid - 1, sell_index - 1, -1):  # 从当前区间向下逐步平仓
-            # 计算该网格的平仓价格
-            # 假设网格的价格为 val2 + (idx + 1) * grid_size
-            closeval = val1 - idx  * grid_size            
-            reason = f'平仓 第 {idx+1} 区，平仓价格 {closeval}'
-
-            #opennum = int(100000/closeval)  
-            opennum =rt["upnum"]- int(100000*idx/closeval)  
-            # 更新加权平均开仓价（减仓时可以更新平仓的金额和数量）
-            rt["winval"] += (closeval - upval) * opennum - closeval * opennum * 0.002  # 计算平仓盈亏
-            rt["upnum"] -= opennum  # 更新持仓数量
-            rt["val3"] = idx  # 更新当前持仓区间
-            remark = f"{vclose} 达到条件平仓 数 {rt['upnum']} 价{rt["upval"] }，平仓价格 {closeval}"
+            open_price = (open_price*open_count+ + opennum * openval)/(open_count+opennum) 
+            open_count += opennum            
+            open_times += 1
 
             if isclosewarn:
-                rt["todayclose"] = True  # 今天平仓
+                rt["todayopen"] = True
 
             if issave:
+                reason = f'开仓 第 {idx} 区，开仓价格 {openval}'
+                remark = f"{vclose} 达到条件开仓数 {rt['upnum']} 价{rt['upval']}，开仓价格 {openval}"
                 log_entry = HistoryLogEntry()
-                log_entry.card = card
-                log_entry.kind = self.kind
-                log_entry.dtime = dval
+                log_entry.card = rt["card"]
+                log_entry.kind = rt["kind"]
+                log_entry.dtime = rt["dval"]
+                log_entry.price = openval
+                log_entry.num = rt["upnum"]
+                log_entry.reason = reason
+                log_entry.winval = rt["winval"]
+                log_entry.remark = remark
+                await self.logger.WARN(log_entry)
+
+        return open_count, open_price, open_times
+
+    async def close_position(self,rt, rv, vclose, val1, grid_size,  isclosewarn, issave, isclose,val2,val3):
+        close_count = 0
+        total_profit = 0
+        close_times = 0
+         # 计算当前价格所在的网格
+        grid_index = int((vclose - val2) / grid_size)
+          # 定义增仓和减仓的区间0-9
+        buy_index = 10 - grid_index-1  # 增仓区间
+       
+        # 当前持仓量 1~10
+        sell_index=10-grid_index  # 减仓区间
+        areagrid=val3        
+        
+        if(areagrid<=sell_index):return close_count, total_profit, close_times
+
+        havanum=rt["upnum"]
+        upval=rt["upval"]
+
+        for idx in range(val3 - 1, sell_index - 1, -1):
+            closeval = val1 - idx * grid_size
+            opennum = havanum - int(100000 * idx / closeval)
+            profit = (closeval - upval) * opennum - closeval * opennum * 0.002
+            total_profit += profit
+            #rt["winval"] += profit
+            havanum -= opennum
+            #rt["val3"] = idx
+            close_count += opennum
+            close_times += 1
+
+            if isclosewarn:
+                rt["todayclose"] = True
+            
+            if issave:
+                reason = f'平仓 第 {idx+1} 区，平仓价格 {closeval}'
+                remark = f"{vclose} 达到条件平仓 数 {rt['upnum']} 价{rt['upval']}，平仓价格 {closeval}"
+                log_entry = HistoryLogEntry()
+                log_entry.card = rt["card"]
+                log_entry.kind = rt["kind"]
+                log_entry.dtime = rt["dval"]
                 log_entry.price = closeval
                 log_entry.num = rt["upnum"]
                 log_entry.reason = reason
                 log_entry.winval = rt["winval"]
                 log_entry.remark = remark
                 await self.logger.WARN(log_entry)
-        
-        pass
+
+        return close_count, total_profit, close_times
 
     def refgrid(self,rt,dt):
         u"""重置区间不用每天算"""  
