@@ -149,7 +149,10 @@ class StockTradeGrid(Strategy):
             #rt["val3"] = idx
             close_count += opennum
             close_times += 1
-
+            rt["allnum"]+=1 
+            if(profit>0):
+                rt["winsum"]+=profit#赢利总和(不计亏损)算凯利公式
+                rt["winnum"]+=1
             if isclosewarn:
                 rt["todayclose"] = True
             
