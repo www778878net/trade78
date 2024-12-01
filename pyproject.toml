@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "trade78"
-version = "0.1.54"
+version = "0.1.55"
 description = "Simplest and easiest to use quantitative trading automation"
 authors = ["Frieda.Hu <www778878net@189.cn>"]
 packages = [
