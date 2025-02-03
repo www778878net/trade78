@@ -92,6 +92,7 @@ class Strategy:
                     log_entry.optimizetime="2021-01-01T00:00:00Z"
                     log_entry.stoptime="2021-01-01T00:00:00Z"
                     log_entry.stoptime2="2021-01-01T00:00:00Z"
+                    log_entry.dval="2021-01-01 00:00:00"
                     await self.logger.WARN(log_entry)
                     continue
         return stocks   

@@ -34,7 +34,7 @@ class Center():
 
     async def run(self):        
         """主循环逻辑"""
-        await self.test()
+        #await self.test()
 
         mode=os.getenv('APP_MODE', self.config.get('DEFAULT', 'APP_MODE', 'runtask')).lower()
         if(mode=="runtask"):
