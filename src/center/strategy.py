@@ -72,7 +72,8 @@ class Strategy:
             for line in file:
                 stock = line.strip()
                 if stock:
-                    #stock=stock[2:]  # 去除前两位字符
+                    if( len(stock)>6):
+                        stock=stock[2:]  # 去除前两位字符
                     log_entry = TradeLogEntry()
                     log_entry.kind = self.kind
                     log_entry.card = stock
@@ -84,9 +85,14 @@ class Strategy:
                     log_entry.par5 = par5list[0]
                     log_entry.par6 = par6list[0]
                     log_entry.event.event_id = log_entry.card+self.kind
-                    log_entry.douser="test"
-                    log_entry.worker="worker"
-                    log_entry.basic.log_index = "stock_trade-v3"
+                    log_entry.douser="syslocalserver"
+                    log_entry.worker="syslocalserver"
+                    log_entry.basic.log_index = "stock_trade-main"
+
+                    log_entry.optimizetime="2021-01-01T00:00:00Z"
+                    log_entry.stoptime="2021-01-01T00:00:00Z"
+                    log_entry.stoptime2="2021-01-01T00:00:00Z"
+                    log_entry.dval="2021-01-01 00:00:00"
                     await self.logger.WARN(log_entry)
                     continue
         return stocks   
