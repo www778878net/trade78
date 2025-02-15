@@ -256,11 +256,11 @@ class Optimizer:
         log_entry.val4 = 0                              # 策略值4
         log_entry.val5 = 0                              # 策略值5
         log_entry.val6 = 0                              # 策略值6
-        log_entry.worker = ''                           # 分布式用户名（优化参数的）
+        log_entry.worker = 'clear'                           # 分布式用户名（优化参数的）
         log_entry.allnum = 0                            # 总数
         log_entry.winnum = 0                            # 胜利次数
         log_entry.winsum = 0                            # 赢利总和
-
+        
         log_entry.event.event_id = log_entry.card+kind
         tmp=await self.logger.WARN(log_entry)
         return

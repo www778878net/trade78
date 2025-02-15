@@ -85,8 +85,8 @@ class Strategy:
                     log_entry.par5 = par5list[0]
                     log_entry.par6 = par6list[0]
                     log_entry.event.event_id = log_entry.card+self.kind
-                    log_entry.douser="syslocalserver"
-                    log_entry.worker="syslocalserver"
+                    log_entry.douser="clear"
+                    log_entry.worker="clear"
                     log_entry.basic.log_index = "stock_trade-main"# "backtest-main" #"stock_trade-main"
 
                     log_entry.optimizetime="2021-01-01T00:00:00Z"
