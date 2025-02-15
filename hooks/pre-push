@@ -82,7 +82,7 @@ elif [ "$current_branch" = "main" ]; then
 
     # 更新Kubernetes中的Job镜像
     echo "通过 SSH 连接到远程 Kubernetes 管理机并更新应用..."
-    ssh -i D:/tmp7788doc/BaiduSyncdisk/1.imp/keys/7788/202410 -p 2213 root@192.168.31.181 << EOF
+    ssh -i D:/tmp7788doc/BaiduSyncdisk/1.imp/keys/7788/202410 -p 2219 root@192.168.31.181 << EOF
 kubectl set image cronjob/trade78-job trade78=$REPO_URL/$IMAGE_NAME:$new_version
 if [ \$? -ne 0 ]; then
   echo "更新 Kubernetes 应用失败"
@@ -91,7 +91,7 @@ fi
 echo "Kubernetes 应用更新成功"
 EOF
 
-    ssh -i D:/tmp7788doc/BaiduSyncdisk/1.imp/keys/7788/202410 -p 2213 root@192.168.31.181 << EOF
+    ssh -i D:/tmp7788doc/BaiduSyncdisk/1.imp/keys/7788/202410 -p 2219 root@192.168.31.181 << EOF
 kubectl set image cronjob/stockoptimizer-job stockoptimizer=$REPO_URL/$IMAGE_NAME:$new_version
 if [ \$? -ne 0 ]; then
   echo "更新 Kubernetes 应用失败"

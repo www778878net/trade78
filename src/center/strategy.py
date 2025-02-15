@@ -87,12 +87,13 @@ class Strategy:
                     log_entry.event.event_id = log_entry.card+self.kind
                     log_entry.douser="syslocalserver"
                     log_entry.worker="syslocalserver"
-                    log_entry.basic.log_index = "stock_trade-main"
+                    log_entry.basic.log_index = "stock_trade-main"# "backtest-main" #"stock_trade-main"
 
                     log_entry.optimizetime="2021-01-01T00:00:00Z"
                     log_entry.stoptime="2021-01-01T00:00:00Z"
                     log_entry.stoptime2="2021-01-01T00:00:00Z"
                     log_entry.dval="2021-01-01 00:00:00"
+                   
                     await self.logger.WARN(log_entry)
                     continue
         return stocks   
