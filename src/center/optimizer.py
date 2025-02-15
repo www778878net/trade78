@@ -240,13 +240,13 @@ class Optimizer:
         log_entry.par5 = bestpar5
         log_entry.par6 = bestpar6
         # 时区简单点处理了算
-        log_entry.optimizetime = (datetime.datetime.now() - datetime.timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S')   # 优化时间
+        log_entry.optimizetime = datetime.datetime.now().astimezone().isoformat()  # 优化时间
         log_entry.winval = 0                            # 算法利润
         log_entry.upnum = 0                             # 上升数量
         log_entry.downnum = 0                           # 下降数量
-        log_entry.stoptime = '1911-01-01 00:00:00'               # 停止时间1
-        log_entry.stoptime2 = '0001-01-01 00:00:00'              # 停止时间2
-        log_entry.dval = '1910-01-01 00:00:00'                   # 日期值
+        log_entry.stoptime = '1911-01-01T00:00:00Z'               # 停止时间1
+        log_entry.stoptime2 = '0001-01-01T00:00:00Z'              # 停止时间2
+        log_entry.dval = '1910-01-01T00:00:00Z'                   # 日期值
         log_entry.val7 = 0                              # 策略值7
         log_entry.val8 = 0                              # 策略值8
         log_entry.val9 = 0                              # 策略值9

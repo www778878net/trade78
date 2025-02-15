@@ -19,7 +19,7 @@ spec:
           containers:
           - name: trade78
             image: crpi-3zr415nakxg4qr8l.cn-hangzhou.personal.cr.aliyuncs.com/7788soft/trade78:latest
-            imagePullPolicy: Always  # 确保始终使用最新的镜像
+            imagePullPolicy: IfNotPresent  # 确保始终使用最新的镜像
             env:
             - name: TZ
               value: "Asia/Shanghai"  # 设置容器时区为北京时间
