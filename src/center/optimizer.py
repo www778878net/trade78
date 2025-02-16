@@ -246,7 +246,7 @@ class Optimizer:
         log_entry.downnum = 0                           # 下降数量
         log_entry.stoptime = '1911-01-01T00:00:00Z'               # 停止时间1
         log_entry.stoptime2 = '0001-01-01T00:00:00Z'              # 停止时间2
-        log_entry.dval = '1910-01-01T00:00:00Z'                   # 日期值
+        log_entry.dval = '1910-01-01 00:00:00'                   # 日期值
         log_entry.val7 = 0                              # 策略值7
         log_entry.val8 = 0                              # 策略值8
         log_entry.val9 = 0                              # 策略值9
